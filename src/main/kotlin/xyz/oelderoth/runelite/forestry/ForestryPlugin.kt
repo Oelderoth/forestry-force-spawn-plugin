@@ -1,14 +1,8 @@
 package xyz.oelderoth.runelite.forestry
 
-import com.google.inject.Provides
-import net.runelite.api.ChatMessageType
-import net.runelite.api.Client
-import net.runelite.api.GameState
-import net.runelite.api.events.GameStateChanged
-import net.runelite.client.config.ConfigManager
-import net.runelite.client.eventbus.Subscribe
 import net.runelite.client.plugins.Plugin
 import net.runelite.client.plugins.PluginDescriptor
+import net.runelite.client.ui.overlay.OverlayManager
 import org.slf4j.LoggerFactory
 import javax.inject.Inject
 
@@ -23,30 +17,21 @@ class ForestryPlugin : Plugin() {
     }
 
     @Inject
-    lateinit var client: Client
+    lateinit var overlayManager: OverlayManager
 
     @Inject
-    lateinit var config: PluginConfig
+    lateinit var overlay: ForestryOverlay
 
-    @Throws(Exception::class)
+    @Inject
+    lateinit var service: ForestryService
+
     override fun startUp() {
-        log.info("Example started!")
+        overlayManager.add(overlay)
+        service.enable()
     }
 
-    @Throws(Exception::class)
     override fun shutDown() {
-        log.info("Example stopped!")
-    }
-
-    @Subscribe
-    fun onGameStateChanged(gameStateChanged: GameStateChanged) {
-        if (gameStateChanged.gameState == GameState.LOGGED_IN) {
-            client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Example says " + config.greeting(), null)
-        }
-    }
-
-    @Provides
-    fun provideConfig(configManager: ConfigManager): PluginConfig {
-        return configManager.getConfig(PluginConfig::class.java)
+        overlayManager.remove(overlay)
+        service.disable()
     }
 }
