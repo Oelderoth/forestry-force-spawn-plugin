@@ -1,5 +1,16 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
 	id 'java'
+    id "org.jetbrains.kotlin.jvm" version "2.1.10"
+}
+
+kotlin {
+    jvmToolchain {
+        compilerOptions {
+            jvmTarget = JvmTarget.JVM_11
+        }
+    }
 }
 
 repositories {
@@ -24,9 +35,10 @@ dependencies {
 	testImplementation 'junit:junit:4.12'
 	testImplementation group: 'net.runelite', name:'client', version: runeLiteVersion
 	testImplementation group: 'net.runelite', name:'jshell', version: runeLiteVersion
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 }
 
-group = 'com.example'
+group = 'xyz.oelderoth'
 version = '1.0-SNAPSHOT'
 
 tasks.withType(JavaCompile).configureEach {
@@ -37,7 +49,7 @@ tasks.withType(JavaCompile).configureEach {
 tasks.register('shadowJar', Jar) {
 	dependsOn configurations.testRuntimeClasspath
 	manifest {
-		attributes('Main-Class': 'com.example.ExamplePluginTest', 'Multi-Release': true)
+		attributes('Main-Class': 'xyz.oelderoth.PluginTest', 'Multi-Release': true)
 	}
 
 	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
