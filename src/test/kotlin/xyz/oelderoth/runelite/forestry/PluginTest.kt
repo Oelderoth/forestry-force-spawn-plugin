@@ -1,4 +1,4 @@
-package xyz.oelderoth
+package xyz.oelderoth.runelite.forestry
 
 import net.runelite.client.RuneLite
 import net.runelite.client.externalplugins.ExternalPluginManager

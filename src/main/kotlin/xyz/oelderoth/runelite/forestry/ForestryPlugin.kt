@@ -1,4 +1,4 @@
-package xyz.oelderoth
+package xyz.oelderoth.runelite.forestry
 
 import com.google.inject.Provides
 import net.runelite.api.ChatMessageType
@@ -12,9 +12,13 @@ import net.runelite.client.plugins.PluginDescriptor
 import org.slf4j.LoggerFactory
 import javax.inject.Inject
 
-@PluginDescriptor(name = "Forestry Spawn Helper")
+@PluginDescriptor(
+    name = ForestryPlugin.PLUGIN_NAME,
+    description = "A plugin to help with force spawning Forestry events"
+)
 class ForestryPlugin : Plugin() {
     companion object {
+        const val PLUGIN_NAME = "Forestry Spawn Helper"
         private val log = LoggerFactory.getLogger(this::class.java)
     }
 

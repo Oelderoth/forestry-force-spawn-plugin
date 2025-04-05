@@ -1,4 +1,4 @@
-package xyz.oelderoth
+package xyz.oelderoth.runelite.forestry
 
 import net.runelite.client.config.Config
 import net.runelite.client.config.ConfigGroup
