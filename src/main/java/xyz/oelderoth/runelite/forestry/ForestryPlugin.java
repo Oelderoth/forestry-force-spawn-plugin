@@ -4,11 +4,10 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
-import xyz.oelderoth.runelite.forestry.service.ForceSpawnService;
 import javax.inject.Inject;
 
 @PluginDescriptor(
-    name = "Forestry Spawn Helper",
+    name = ForestryPlugin.PLUGIN_NAME,
     description = "A plugin to help with force spawning Forestry events"
 )
 @Slf4j
@@ -25,7 +24,7 @@ public class ForestryPlugin extends Plugin {
     private OverlayManager overlayManager;
 
 	@Override
-	protected void startUp() throws Exception {
+	protected void startUp() {
 		log.info("Starting Forestry Plugin");
         forceSpawnService.enable();
         overlayManager.add(forceSpawnOverlay);

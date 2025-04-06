@@ -1,18 +1,18 @@
 package xyz.oelderoth.runelite.forestry;
 
 import javax.inject.Singleton;
+import lombok.val;
 import net.runelite.api.Client;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.outline.ModelOutlineRenderer;
-import xyz.oelderoth.runelite.forestry.service.ForceSpawnService;
-import xyz.oelderoth.runelite.forestry.service.ForceSpawnService.PlayerState.*;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.time.Instant;
 import javax.inject.Inject;
+import xyz.oelderoth.runelite.forestry.domain.PlayerState;
 
 @Singleton
 public class ForceSpawnOverlay extends Overlay {
@@ -34,16 +34,16 @@ public class ForceSpawnOverlay extends Overlay {
 
 	@Override
     public Dimension render(Graphics2D graphics) {
-		ForceSpawnService.PlayerState state = forceSpawnService.getPlayerState();
-		if (state instanceof Woodcutting) {
-			Woodcutting wcState = (Woodcutting) state;
+		val state = forceSpawnService.getPlayerState();
+		val wcState = forceSpawnService.getWoodcuttingState();
+		if (state == PlayerState.Woodcutting && wcState != null) {
 			if (client.getTickCount() - wcState.getStartTick() >= 4) {
 				renderer.drawOutline(wcState.getGameObject(), 1, Color.BLUE, 0);
 			}
 		}
 
         long now = Instant.now().toEpochMilli();
-		forceSpawnService.getTimers().stream()
+		forceSpawnService.getTreeTimers().stream()
 			.filter(timer -> timer.getWorld() == client.getWorld())
 			.forEach(timer -> {
 				Color color = (now - timer.getStartTimeMs() > timer.getTree().getDurationMs()) ? Color.GREEN : Color.YELLOW;
