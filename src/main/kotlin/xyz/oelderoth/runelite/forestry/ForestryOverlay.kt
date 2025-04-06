@@ -20,7 +20,7 @@ class ForestryOverlay @Inject private constructor(
     }
 
     override fun render(graphics: Graphics2D?): Dimension? {
-        service.currentTree?.let {
+        service.currentTree?.takeIf { service.woodcuttingTicks >= 4 }?.let {
             renderer.drawOutline(it, 1, ColorScheme.PROGRESS_INPROGRESS_COLOR, 0)
         }
 

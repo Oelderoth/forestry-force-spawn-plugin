@@ -1,19 +1,28 @@
 package xyz.oelderoth.runelite.forestry
 
 import com.google.common.collect.ImmutableSet
-import net.runelite.api.AnimationID
-import net.runelite.api.Client
-import net.runelite.api.GameObject
-import net.runelite.api.Player
+import net.runelite.api.*
 import net.runelite.api.coords.Angle
 import net.runelite.api.coords.Direction
 import net.runelite.api.coords.LocalPoint
+import net.runelite.api.coords.WorldPoint
+import net.runelite.api.events.GameStateChanged
 import net.runelite.api.events.GameTick
 import net.runelite.client.eventbus.EventBus
 import net.runelite.client.eventbus.Subscribe
+import org.slf4j.LoggerFactory
 import xyz.oelderoth.runelite.forestry.Tree.Companion.isTree
+import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Singleton
+
+data class TreeInfo(
+    val tree: Tree,
+    val world: Int,
+    val gameObject: GameObject,
+    val startTime: Long,
+    val duration: Int
+)
 
 @Singleton
 class ForestryService @Inject private constructor(
@@ -21,6 +30,8 @@ class ForestryService @Inject private constructor(
     private val eventBus: EventBus,
 ) {
     companion object {
+        private val log = LoggerFactory.getLogger(this::class.java)
+
         private val WOODCUTTING_ANIMS: Set<Int> = ImmutableSet.of(
             AnimationID.WOODCUTTING_BRONZE,
             AnimationID.WOODCUTTING_IRON,
@@ -50,14 +61,17 @@ class ForestryService @Inject private constructor(
         )
     }
 
-    private var playerWoodcutting = false
+    var playerWoodcutting = false
+        private set
     var currentTree: GameObject? = null
         private set
-    private var woodcuttingTicks: Int = 0
+    var woodcuttingTicks: Int = 0
+        private set
+    private var startCutTime: Instant? = null
+    val trackedTrees: MutableList<TreeInfo> = mutableListOf()
 
     fun enable() = eventBus.register(this)
     fun disable() = eventBus.unregister(this)
-
 
     @Subscribe
     private fun onGameTick(tick: GameTick) {
@@ -75,18 +89,37 @@ class ForestryService @Inject private constructor(
         } else {
             if (playerWoodcutting) onStopWoodcutting()
         }
+
+        if (playerWoodcutting)
+            woodcuttingTicks++
+
+        val now = Instant.now().toEpochMilli()
+        trackedTrees.filter { it.startTime + it.duration <= now }.forEach {
+            client.addChatMessage(ChatMessageType.GAMEMESSAGE, "Forestry Plugin", "${it.tree} on world ${it.world} is ready", null)
+        }
+        trackedTrees.removeAll { it.startTime + it.duration <= now }
+    }
+
+    @Subscribe
+    private fun onGameStateChanged(e: GameStateChanged) {
+        if (playerWoodcutting && woodcuttingTicks >= 4 && currentTree != null && (e.gameState == GameState.HOPPING || e.gameState == GameState.LOGIN_SCREEN)) {
+            val tree = Tree.getTree(currentTree!!)!!
+            trackedTrees.add(TreeInfo(tree, client.world, currentTree!!, startCutTime!!.toEpochMilli(), tree.durationMs))
+        }
     }
 
     private fun onStartWoodcutting(tree: GameObject) {
         playerWoodcutting = true
         woodcuttingTicks = 0
         currentTree = tree
+        startCutTime = Instant.now()
     }
 
     private fun onStopWoodcutting() {
         playerWoodcutting = false
         woodcuttingTicks = 0
         currentTree = null
+        startCutTime = null
     }
 
     private fun getFacingTree(player: Player): GameObject? {
