@@ -14,7 +14,6 @@ import net.runelite.api.ObjectID;
 import java.lang.reflect.Modifier;
 import net.runelite.api.TileObject;
 import org.apache.commons.lang3.tuple.Pair;
-import org.jetbrains.annotations.NotNull;
 
 @Getter
 @Slf4j
@@ -34,7 +33,7 @@ public enum TreeType
 	private static final Map<Integer, TreeType> treeTypeById;
 	private static final Pattern treeRegex = Pattern.compile("([\\w_]+?)_TREE_\\d+");
 
-	private static Optional<Pair<Integer, TreeType>> getTreeTypeFromField(@NotNull Field field)
+	private static Optional<Pair<Integer, TreeType>> getTreeTypeFromField(Field field)
 	{
 		if (!Modifier.isStatic(field.getModifiers()) || !(field.getType() == int.class || field.getType() == Integer.class))
 		{

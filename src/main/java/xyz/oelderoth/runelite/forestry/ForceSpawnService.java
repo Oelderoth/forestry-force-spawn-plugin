@@ -18,7 +18,6 @@ import net.runelite.api.events.GameTick;
 import net.runelite.api.events.ScriptPreFired;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
-import org.jetbrains.annotations.NotNull;
 import java.time.Instant;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -122,7 +121,7 @@ public class ForceSpawnService
 		}
 	}
 
-	private @NotNull Optional<GameObject> getFacingTree(Player player)
+	private Optional<GameObject> getFacingTree(Player player)
 	{
 		val facingLocation = getFacingLocation(player);
 		return getTreeFromCoord(facingLocation);
