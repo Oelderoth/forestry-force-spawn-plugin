@@ -4,6 +4,8 @@ import net.runelite.client.plugins.Plugin
 import net.runelite.client.plugins.PluginDescriptor
 import net.runelite.client.ui.overlay.OverlayManager
 import org.slf4j.LoggerFactory
+import xyz.oelderoth.runelite.forestry.overlay.ForceSpawnOverlay
+import xyz.oelderoth.runelite.forestry.service.ForceSpawnService
 import javax.inject.Inject
 
 @PluginDescriptor(
@@ -17,21 +19,21 @@ class ForestryPlugin : Plugin() {
     }
 
     @Inject
+    lateinit var forceSpawnService: ForceSpawnService
+
+    @Inject
+    lateinit var forceSpawnOverlay: ForceSpawnOverlay
+
+    @Inject
     lateinit var overlayManager: OverlayManager
 
-    @Inject
-    lateinit var overlay: ForestryOverlay
-
-    @Inject
-    lateinit var service: ForestryService
-
     override fun startUp() {
-        overlayManager.add(overlay)
-        service.enable()
+        forceSpawnService.enable()
+        overlayManager.add(forceSpawnOverlay)
     }
 
     override fun shutDown() {
-        overlayManager.remove(overlay)
-        service.disable()
+        forceSpawnService.disable()
+        overlayManager.remove(forceSpawnOverlay)
     }
 }
