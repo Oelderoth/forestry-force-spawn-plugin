@@ -5,8 +5,10 @@ import net.runelite.api.*
 import net.runelite.api.coords.Angle
 import net.runelite.api.coords.Direction
 import net.runelite.api.coords.LocalPoint
+import net.runelite.api.coords.WorldPoint
 import net.runelite.api.events.GameStateChanged
 import net.runelite.api.events.GameTick
+import net.runelite.api.events.ScriptPreFired
 import net.runelite.client.eventbus.EventBus
 import net.runelite.client.eventbus.Subscribe
 import org.slf4j.LoggerFactory
@@ -82,8 +84,26 @@ class ForceSpawnService @Inject private constructor(
 
             onStartCutTree(facingTree, treeType)
 
-        } else if (state is Woodcutting){
+        } else if (state is Woodcutting) {
             onStopCutTree(state.gameObject)
+        }
+    }
+
+    @Subscribe
+    fun onScriptPreFired(scriptPreFired: ScriptPreFired) {
+        if (scriptPreFired.scriptId == ScriptID.ADD_OVERLAYTIMER_LOC) {
+            val args = scriptPreFired.scriptEvent.arguments
+            val locCoord = args[1] as Int
+            val locType = args[4] as Int
+
+            if (locType == 2) { // Tree despawned
+                val worldPoint = WorldPoint.fromCoord(locCoord)
+                val eventTree = getTreeFromCoord(worldPoint)
+                if (_timers.removeAll { timer ->
+                        timer.world == client.world && timer.gameObject.hash == eventTree?.hash
+                    }) log.info("Removed timer after tree was cut down")
+            }
+
         }
     }
 
@@ -96,13 +116,17 @@ class ForceSpawnService @Inject private constructor(
             Direction.WEST -> worldPoint.dx(-1)
             else -> return null
         }
-        val localPoint = LocalPoint.fromWorld(client.topLevelWorldView, facingPoint)!!
-        val tile = client.topLevelWorldView?.scene?.tiles?.get(facingPoint.plane)?.get(localPoint.sceneX)
-            ?.get(localPoint.sceneY)
-        val objects = tile?.gameObjects
-        val tree = objects?.filterNotNull()?.firstOrNull { it.isTree }
-        return tree
+        return getTreeFromCoord(facingPoint)
     }
+
+    private fun getTreeFromCoord(worldPoint: WorldPoint) =
+        LocalPoint.fromWorld(client.topLevelWorldView, worldPoint)?.let { localPoint ->
+            val tile = client.topLevelWorldView?.scene?.tiles?.get(worldPoint.plane)?.get(localPoint.sceneX)
+                ?.get(localPoint.sceneY)
+            val objects = tile?.gameObjects
+            val tree = objects?.filterNotNull()?.firstOrNull { it.isTree }
+            tree
+        }
 
     private fun onStartCutTree(gameObject: GameObject, tree: Tree) {
         playerState = Woodcutting(tree, client.tickCount, Instant.now().toEpochMilli(), gameObject)
