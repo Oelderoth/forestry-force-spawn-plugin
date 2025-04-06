@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
-import xyz.oelderoth.runelite.forestry.overlay.ForceSpawnOverlay;
 import xyz.oelderoth.runelite.forestry.service.ForceSpawnService;
 import javax.inject.Inject;
 
