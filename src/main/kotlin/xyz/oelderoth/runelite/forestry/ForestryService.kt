@@ -12,7 +12,6 @@ import net.runelite.api.events.GameTick
 import net.runelite.client.eventbus.EventBus
 import net.runelite.client.eventbus.Subscribe
 import xyz.oelderoth.runelite.forestry.Tree.Companion.isTree
-import xyz.oelderoth.runelite.kotlin.extensions.getLogger
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -103,7 +102,7 @@ class ForestryService @Inject private constructor(
         val tile = client.topLevelWorldView?.scene?.tiles?.get(facingPoint.plane)?.get(localPoint.sceneX)
                     ?.get(localPoint.sceneY)
         val objects = tile?.gameObjects
-        val tree = objects?.firstOrNull { it.isTree }
+        val tree = objects?.filterNotNull()?.firstOrNull { it.isTree }
         return tree
     }
 }
