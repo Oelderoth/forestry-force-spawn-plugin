@@ -23,6 +23,7 @@ import java.time.Instant;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import xyz.oelderoth.runelite.forestry.domain.PlayerState;
+import xyz.oelderoth.runelite.forestry.domain.TreeType;
 import xyz.oelderoth.runelite.forestry.domain.TreeTimer;
 import xyz.oelderoth.runelite.forestry.domain.WoodcuttingState;
 
@@ -71,7 +72,7 @@ public class ForceSpawnService
 			return;
 		}
 
-		treeTimers.add(new TreeTimer(client.getWorld(), woodcuttingState.getGameObject(), woodcuttingState.getTree(), woodcuttingState.getStartTimeMs()));
+		treeTimers.add(new TreeTimer(client.getWorld(), woodcuttingState.getGameObject(), woodcuttingState.getTreeType(), woodcuttingState.getStartTimeMs()));
 	}
 
 	@Subscribe
@@ -148,14 +149,23 @@ public class ForceSpawnService
 
 	private Optional<GameObject> getTreeFromCoord(WorldPoint worldPoint)
 	{
-		return Optional.ofNullable(LocalPoint.fromWorld(client.getTopLevelWorldView(), worldPoint)).map(localPoint -> client.getTopLevelWorldView().getScene().getTiles()[worldPoint.getPlane()][localPoint.getSceneX()][localPoint.getSceneY()]).map(Tile::getGameObjects).flatMap(objects -> Arrays.stream(objects).filter(Tree.Companion::isTree).findFirst());
+		return Optional.ofNullable(
+			LocalPoint.fromWorld(client.getTopLevelWorldView(), worldPoint))
+			.map(localPoint -> client.getTopLevelWorldView().getScene().getTiles()[worldPoint.getPlane()][localPoint.getSceneX()][localPoint.getSceneY()])
+			.map(Tile::getGameObjects)
+			.flatMap(objects -> Arrays.stream(objects).filter(it -> TreeType.getTreeTypeOf(it).isPresent()).findFirst());
 	}
 
 	private void onStartCutTree(GameObject gameObject)
 	{
-		val tree = Tree.Companion.getTree(gameObject);
+		val tree = TreeType.getTreeTypeOf(gameObject);
+		if (tree.isEmpty())
+		{
+			return;
+		}
+
 		playerState = PlayerState.Woodcutting;
-		woodcuttingState = new WoodcuttingState(tree, gameObject, client.getTickCount(), Instant.now().toEpochMilli());
+		woodcuttingState = new WoodcuttingState(tree.get(), gameObject, client.getTickCount(), Instant.now().toEpochMilli());
 	}
 
 	private void onStopCutTree(GameObject gameObject)

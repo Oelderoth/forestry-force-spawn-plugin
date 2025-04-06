@@ -46,7 +46,7 @@ public class ForceSpawnOverlay extends Overlay {
 		forceSpawnService.getTreeTimers().stream()
 			.filter(timer -> timer.getWorld() == client.getWorld())
 			.forEach(timer -> {
-				Color color = (now - timer.getStartTimeMs() > timer.getTree().getDurationMs()) ? Color.GREEN : Color.YELLOW;
+				Color color = (now - timer.getStartTimeMs() > timer.getTreeType().getDurationMs()) ? Color.GREEN : Color.YELLOW;
 				renderer.drawOutline(timer.getGameObject(), 1, color, 0);
 			});
 
