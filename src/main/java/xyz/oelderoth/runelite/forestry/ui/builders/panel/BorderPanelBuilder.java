@@ -6,7 +6,7 @@ import javax.swing.JPanel;
 import lombok.AccessLevel;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import xyz.oelderoth.runelite.forestry.ui.PluginColorScheme;
+import xyz.oelderoth.runelite.forestry.ui.PluginScheme;
 import xyz.oelderoth.runelite.forestry.ui.builders.component.AbstractComponentBuilder;
 
 @Setter
@@ -35,7 +35,7 @@ public class BorderPanelBuilder extends AbstractComponentBuilder<JPanel, BorderP
 	public BorderPanelBuilder()
 	{
 		this(new JPanel(new BorderLayout()));
-		background(PluginColorScheme.panelColor);
+		background(PluginScheme.PANEL_COLOR);
 	}
 
 	public BorderPanelBuilder addNorth(JComponent component) {
@@ -65,7 +65,6 @@ public class BorderPanelBuilder extends AbstractComponentBuilder<JPanel, BorderP
 
 	public JPanel build()
 	{
-		if (border != null) panel.setBorder(border);
 		apply(panel);
 		return panel;
 	}

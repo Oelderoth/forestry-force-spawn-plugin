@@ -4,6 +4,7 @@ import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import xyz.oelderoth.runelite.forestry.ui.PluginScheme;
 
 @Setter
 @Accessors(fluent = true, chain = true)
@@ -25,4 +26,19 @@ public class GridBagConstraintsBuilder
 	{
 		return new GridBagConstraints(gridx, gridy, gridwidth, gridheight, weightx, weighty, anchor, fill, insets, ipadx, ipady);
 	}
+
+	public static GridBagConstraints verticalRelative() {
+		return verticalRelative(PluginScheme.SMALL_PADDING);
+	}
+
+	public static GridBagConstraints verticalRelative(int vPadding) {
+		return new GridBagConstraintsBuilder()
+			.weightx(1.0)
+			.fill(GridBagConstraints.HORIZONTAL)
+			.gridx(0)
+			.gridy(GridBagConstraints.RELATIVE)
+			.insets(new Insets(vPadding, 0, vPadding, 0))
+			.build();
+	}
+
 }

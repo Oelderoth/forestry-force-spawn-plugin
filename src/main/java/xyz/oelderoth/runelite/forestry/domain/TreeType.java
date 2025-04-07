@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import net.runelite.api.ItemID;
 import net.runelite.api.ObjectID;
 import java.lang.reflect.Modifier;
 import net.runelite.api.TileObject;
@@ -20,15 +21,16 @@ import org.apache.commons.lang3.tuple.Pair;
 @AllArgsConstructor
 public enum TreeType
 {
-	Oak(8400),
-	Willow(8400),
-	Teak(9000),
-	Maple(35400),
-	Mahogany(8400),
-	Yew(59400),
-	Magic(119400);
+	Oak(27000, ItemID.OAK_LOGS),
+	Willow(30000, ItemID.WILLOW_LOGS),
+	Teak(30000, ItemID.TEAK_LOGS),
+	Maple(60000, ItemID.MAPLE_LOGS),
+	Mahogany(60000, ItemID.MAHOGANY_LOGS),
+	Yew(234000, ItemID.YEW_LOGS),
+	Magic(264000, ItemID.MAGIC_LOGS);
 
-	private final int durationMs;
+	private final int despawnDurationMs;
+	private final int itemId;
 
 	private static final Map<Integer, TreeType> treeTypeById;
 	private static final Pattern treeRegex = Pattern.compile("([\\w_]+?)_TREE_\\d+");

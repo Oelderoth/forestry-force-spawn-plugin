@@ -13,6 +13,7 @@ import java.awt.Graphics2D;
 import java.time.Instant;
 import javax.inject.Inject;
 import xyz.oelderoth.runelite.forestry.domain.PlayerState;
+import xyz.oelderoth.runelite.forestry.ui.PluginScheme;
 
 @Singleton
 public class ForceSpawnOverlay extends Overlay {
@@ -37,8 +38,8 @@ public class ForceSpawnOverlay extends Overlay {
 		val state = forceSpawnService.getPlayerState();
 		val wcState = forceSpawnService.getWoodcuttingState();
 		if (state == PlayerState.Woodcutting && wcState != null) {
-			if (client.getTickCount() - wcState.getStartTick() >= 4) {
-				renderer.drawOutline(wcState.getGameObject(), 1, Color.BLUE, 0);
+			if (client.getTickCount() - wcState.getStartTick() >= ForceSpawnService.MIN_TICK_COUNT) {
+				renderer.drawOutline(wcState.getGameObject(), 1, PluginScheme.INCOMPLETE_COLOR, 0);
 			}
 		}
 
@@ -46,7 +47,7 @@ public class ForceSpawnOverlay extends Overlay {
 		forceSpawnService.getTreeTimers().stream()
 			.filter(timer -> timer.getWorld() == client.getWorld())
 			.forEach(timer -> {
-				Color color = (now - timer.getStartTimeMs() > timer.getTreeType().getDurationMs()) ? Color.GREEN : Color.YELLOW;
+				Color color = (now - timer.getStartTimeMs() > timer.getTreeType().getDespawnDurationMs()) ? PluginScheme.SUCCESS_COLOR : PluginScheme.INCOMPLETE_COLOR;
 				renderer.drawOutline(timer.getGameObject(), 1, color, 0);
 			});
 

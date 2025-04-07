@@ -7,7 +7,7 @@ import javax.swing.JPanel;
 import lombok.AccessLevel;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import xyz.oelderoth.runelite.forestry.ui.PluginColorScheme;
+import xyz.oelderoth.runelite.forestry.ui.PluginScheme;
 import xyz.oelderoth.runelite.forestry.ui.builders.component.AbstractComponentBuilder;
 
 @Setter
@@ -18,6 +18,16 @@ public class GridBagPanelBuilder extends AbstractComponentBuilder<JPanel, GridBa
 	private JPanel panel;
 	private GridBagConstraints constraints = new GridBagConstraints();
 
+	public static GridBagPanelBuilder fromPanel(JPanel panel) {
+		if (!(panel.getLayout() instanceof GridBagLayout))
+			if (panel.getComponents().length > 0)
+				throw new IllegalArgumentException("Panel must have a GridBagLayout or zero components");
+			else
+				panel.setLayout(new GridBagLayout());
+
+		return new GridBagPanelBuilder(panel);
+	}
+
 	protected GridBagPanelBuilder(JPanel panel)
 	{
 		this.panel = panel;
@@ -26,7 +36,7 @@ public class GridBagPanelBuilder extends AbstractComponentBuilder<JPanel, GridBa
 	public GridBagPanelBuilder()
 	{
 		this(new JPanel(new GridBagLayout()));
-		background(PluginColorScheme.panelColor);
+		background(PluginScheme.PANEL_COLOR);
 	}
 
 	public GridBagPanelBuilder add(JComponent component) {
@@ -36,7 +46,6 @@ public class GridBagPanelBuilder extends AbstractComponentBuilder<JPanel, GridBa
 
 	public JPanel build()
 	{
-		if (border != null) panel.setBorder(border);
 		apply(panel);
 		return panel;
 	}
