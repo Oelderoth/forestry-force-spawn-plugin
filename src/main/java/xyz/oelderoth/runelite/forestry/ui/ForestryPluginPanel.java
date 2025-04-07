@@ -50,10 +50,13 @@ public class ForestryPluginPanel extends PluginPanel
 	@Inject
 	private ItemManager itemManager;
 
+	private final WorldHopService worldHopService;
+
 	@Inject
-	public ForestryPluginPanel(CurrentTreePanel currentTreePanel)
+	public ForestryPluginPanel(CurrentTreePanel currentTreePanel, WorldHopService worldHopService)
 	{
 		this.currentTreePanel = currentTreePanel;
+		this.worldHopService = worldHopService;
 
 		var panelTitle = new LabelBuilder()
 			.text(ForestryPlugin.PLUGIN_NAME)
@@ -96,7 +99,7 @@ public class ForestryPluginPanel extends PluginPanel
 			unknownKeys.remove(key);
 			if (timerPanelsByHash.containsKey(key)) continue;
 
-			var panel = new TreeTimerPanel(timer, itemManager);
+			var panel = new TreeTimerPanel(timer, itemManager, worldHopService);
 			timerPanelsByHash.put(key, panel);
 			timerListPanel.add(panel, GridBagConstraintsBuilder.verticalRelative());
 

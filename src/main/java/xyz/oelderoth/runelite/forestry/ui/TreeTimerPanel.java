@@ -30,7 +30,7 @@ public class TreeTimerPanel extends JPanel
 
 	private final ThinProgressBar progressBar = new ThinProgressBar();
 
-	public TreeTimerPanel(TreeTimer timer, ItemManager itemManager)
+	public TreeTimerPanel(TreeTimer timer, ItemManager itemManager, WorldHopService hopService)
 	{
 		this.timer = timer;
 		progressBar.setValue(0);
@@ -56,7 +56,7 @@ public class TreeTimerPanel extends JPanel
 			.tooltipText("Hop to world " + timer.getWorld())
 			.cursor(Cursor.HAND_CURSOR)
 			.onHover((label, hovering) -> label.setForeground(hovering ? PluginScheme.HINT_HOVER_COLOR : PluginScheme.HINT_COLOR))
-			.onLeftClick(() -> log.info("World Hop not implemented"))
+			.onLeftClick(() -> hopService.hopToWorld(timer.getWorld()))
 			.build();
 
 		var infoPanel = new GridBagPanelBuilder()
