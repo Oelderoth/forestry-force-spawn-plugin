@@ -3,8 +3,10 @@ package xyz.oelderoth.runelite.forestry;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.overlay.OverlayManager;
 import javax.inject.Inject;
+import xyz.oelderoth.runelite.forestry.ui.ForestryPluginPanel;
 
 @PluginDescriptor(
     name = ForestryPlugin.PLUGIN_NAME,
@@ -12,7 +14,10 @@ import javax.inject.Inject;
 )
 @Slf4j
 public class ForestryPlugin extends Plugin {
-	static final String PLUGIN_NAME = "Forestry Spawn Helper";
+	public static final String PLUGIN_NAME = "Forestry Spawn Helper";
+
+	@Inject
+	private ClientToolbar clientToolbar;
 
     @Inject
     private ForceSpawnService forceSpawnService;
@@ -23,16 +28,23 @@ public class ForestryPlugin extends Plugin {
     @Inject
     private OverlayManager overlayManager;
 
+	private ForestryPluginPanel pluginPanel;
+
 	@Override
 	protected void startUp() {
-		log.info("Starting Forestry Plugin");
-        forceSpawnService.enable();
+		// Instantiate after startup to avoid incorrect default Swing styling
+		pluginPanel = new ForestryPluginPanel();
+
+		forceSpawnService.enable();
         overlayManager.add(forceSpawnOverlay);
+		clientToolbar.addNavigation(pluginPanel.getNavigationButton());
     }
 
 	@Override
     public void shutDown() {
         forceSpawnService.disable();
         overlayManager.remove(forceSpawnOverlay);
+		clientToolbar.removeNavigation(pluginPanel.getNavigationButton());
+		pluginPanel = null;
     }
 }
