@@ -45,7 +45,7 @@ public class ForestryPlugin extends Plugin
 		overlayManager.add(forceSpawnOverlay);
 		clientToolbar.addNavigation(pluginPanel.getNavigationButton());
 
-		panelUpdateFuture = executorService.scheduleAtFixedRate(pluginPanel::update, 500, 500, TimeUnit.MILLISECONDS);
+		panelUpdateFuture = executorService.scheduleAtFixedRate(pluginPanel::update, 200, 200, TimeUnit.MILLISECONDS);
 	}
 
 	@Override

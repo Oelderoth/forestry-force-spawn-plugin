@@ -2,6 +2,7 @@ package xyz.oelderoth.runelite.forestry.ui.builders.component;
 
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
@@ -23,6 +24,7 @@ public abstract class AbstractComponentBuilder<T extends JComponent, B extends A
 	private Font font;
 	private Boolean visible;
 	private Rectangle bounds;
+	private Dimension preferredSize;
 	private String tooltipText;
 	private BiConsumer<T, Boolean> onHover;
 	private Consumer<T> onLeftClick;
@@ -75,6 +77,15 @@ public abstract class AbstractComponentBuilder<T extends JComponent, B extends A
 		return (B) this;
 	}
 
+	public B preferredSize(Dimension size) {
+		preferredSize = size;
+		return (B) this;
+	}
+
+	public B preferredSize(int w, int h) {
+		return preferredSize(new Dimension(w, h));
+	}
+
 	public B onHover(BiConsumer<T, Boolean> handler) {
 		this.onHover = handler;
 		return (B) this;
@@ -122,6 +133,8 @@ public abstract class AbstractComponentBuilder<T extends JComponent, B extends A
 			component.setVisible(visible);
 		if (tooltipText != null)
 			component.setToolTipText(tooltipText);
+		if (preferredSize != null)
+			component.setPreferredSize(preferredSize);
 		if (cursor != null)
 			component.setCursor(cursor);
 		if (onHover != null || onLeftClick != null) {

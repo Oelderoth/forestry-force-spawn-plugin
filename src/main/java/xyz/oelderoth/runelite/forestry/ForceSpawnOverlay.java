@@ -38,7 +38,7 @@ public class ForceSpawnOverlay extends Overlay {
 		val state = forceSpawnService.getPlayerState();
 		val wcState = forceSpawnService.getWoodcuttingState();
 		if (state == PlayerState.Woodcutting && wcState != null) {
-			if (client.getTickCount() - wcState.getStartTick() >= ForceSpawnService.MIN_TICK_COUNT) {
+			if (client.getTickCount() - wcState.getStartTick() > ForceSpawnService.MIN_TICK_COUNT) {
 				renderer.drawOutline(wcState.getGameObject(), 1, PluginScheme.INCOMPLETE_COLOR, 0);
 			}
 		}

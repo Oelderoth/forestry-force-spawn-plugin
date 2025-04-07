@@ -1,10 +1,12 @@
 package xyz.oelderoth.runelite.forestry.ui;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
 import net.runelite.api.Client;
+import net.runelite.api.Constants;
+import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.FontManager;
 import xyz.oelderoth.runelite.forestry.ForceSpawnService;
 import xyz.oelderoth.runelite.forestry.domain.PlayerState;
@@ -14,6 +16,7 @@ import xyz.oelderoth.runelite.forestry.ui.builders.panel.BorderPanelBuilder;
 import xyz.oelderoth.runelite.forestry.ui.builders.panel.GridBagConstraintsBuilder;
 import xyz.oelderoth.runelite.forestry.ui.builders.panel.GridBagPanelBuilder;
 
+@Singleton
 public class CurrentTreePanel extends JPanel
 {
 	@Inject
@@ -22,32 +25,38 @@ public class CurrentTreePanel extends JPanel
 	@Inject
 	private Client client;
 
-	private final JLabel title = new LabelBuilder().build();
+	@Inject
+	private ItemManager itemManager;
 
-	private final JLabel infoLabel = new LabelBuilder()
+	private final JLabel titleLabel = new LabelBuilder()
+		.font(FontManager.getRunescapeSmallFont())
+		.text("<PLACEHOLDER>")
+		.build();
+
+	private final JLabel hintLabel = new LabelBuilder()
 		.foreground(PluginScheme.HINT_COLOR)
 		.font(FontManager.getRunescapeSmallFont())
-		.border(new EmptyBorder(PluginScheme.DEFAULT_PADDING, 0, 0, 0))
 		.build();
+
+	private final JLabel icon = new LabelBuilder()
+			.text("\u00a0")
+			.bounds(0, 0, Constants.ITEM_SPRITE_WIDTH, Constants.ITEM_SPRITE_HEIGHT)
+			.preferredSize(Constants.ITEM_SPRITE_WIDTH, Constants.ITEM_SPRITE_HEIGHT)
+			.build();
 
 	public CurrentTreePanel()
 	{
-		var headerPanel = new BorderPanelBuilder().background(PluginScheme.PANEL_COLOR)
-			.border(BorderBuilder.empty(0, PluginScheme.DEFAULT_PADDING))
-			.addCenter(title)
+		var infoPanel = new GridBagPanelBuilder()
+			.constraints(GridBagConstraintsBuilder.verticalRelative(2))
+			.add(titleLabel)
+			.add(hintLabel)
 			.build();
 
-		var infoPanel = new BorderPanelBuilder().background(PluginScheme.PANEL_COLOR)
-			.border(BorderBuilder.separated(0, PluginScheme.DEFAULT_PADDING))
-			.addCenter(infoLabel)
-			.build();
-
-		GridBagPanelBuilder.fromPanel(this)
+		BorderPanelBuilder.fromPanel(this)
 			.background(PluginScheme.PANEL_COLOR)
-			.border(BorderBuilder.empty(PluginScheme.SMALL_PADDING, 0))
-			.constraints(GridBagConstraintsBuilder.verticalRelative())
-			.add(headerPanel)
-			.add(infoPanel)
+			.border(BorderBuilder.empty(PluginScheme.DEFAULT_PADDING))
+			.addWest(icon)
+			.addCenter(infoPanel)
 			.build();
 
 		update();
@@ -60,22 +69,28 @@ public class CurrentTreePanel extends JPanel
 			var wcStatus = service.getWoodcuttingState();
 			if (wcStatus != null)
 			{
-				title.setText("Cutting " + wcStatus.getTreeType() + " Tree");
+				itemManager.getImage(wcStatus.getTreeType().getItemId()).addTo(icon);
+				titleLabel.setText(wcStatus.getTreeType() + " Tree");
 				var ticks = client.getTickCount() - wcStatus.getStartTick();
-				if (ticks < ForceSpawnService.MIN_TICK_COUNT) {
-					infoLabel.setText("Cut for " + (ForceSpawnService.MIN_TICK_COUNT - ticks) + " ticks before hopping");
-					infoLabel.setForeground(PluginScheme.HINT_COLOR);
-				} else {
-					infoLabel.setText("Ready to hop");
-					infoLabel.setForeground(PluginScheme.SUCCESS_COLOR);
+				var remaining = ForceSpawnService.MIN_TICK_COUNT - ticks;
+				if (remaining > 0)
+				{
+					hintLabel.setText("Cut for " + remaining + " ticks before hopping");
+					hintLabel.setForeground(PluginScheme.HINT_COLOR);
+				}
+				else
+				{
+					hintLabel.setText("Ready to hop");
+					hintLabel.setForeground(PluginScheme.SUCCESS_COLOR);
 				}
 			}
 		}
 		else
 		{
-			title.setText("Not Woodcutting");
-			infoLabel.setText("Start cutting an eligible tree");
-			infoLabel.setForeground(PluginScheme.HINT_COLOR);
+			titleLabel.setText("Not Woodcutting");
+			hintLabel.setText("Start cutting an eligible tree");
+			hintLabel.setForeground(PluginScheme.HINT_COLOR);
+			icon.setIcon(null);
 		}
 	}
 }

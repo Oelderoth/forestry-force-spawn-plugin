@@ -1,11 +1,7 @@
 package xyz.oelderoth.runelite.forestry.ui;
 
-import java.awt.Color;
-import java.time.Instant;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.swing.JLabel;
@@ -20,7 +16,6 @@ import net.runelite.client.util.ImageUtil;
 import org.apache.commons.lang3.tuple.Pair;
 import xyz.oelderoth.runelite.forestry.ForceSpawnService;
 import xyz.oelderoth.runelite.forestry.ForestryPlugin;
-import xyz.oelderoth.runelite.forestry.ui.builders.border.BorderBuilder;
 import xyz.oelderoth.runelite.forestry.ui.builders.component.LabelBuilder;
 import xyz.oelderoth.runelite.forestry.ui.builders.panel.BorderPanelBuilder;
 import xyz.oelderoth.runelite.forestry.ui.builders.panel.GridBagConstraintsBuilder;
@@ -38,7 +33,6 @@ public class ForestryPluginPanel extends PluginPanel
 
 	private final CurrentTreePanel currentTreePanel;
 	private final Map<Pair<Long, Integer>, TreeTimerPanel> timerPanelsByHash = new HashMap<>();
-
 	private final JLabel timerHint = new LabelBuilder()
 		.border(new EmptyBorder(0, PluginScheme.DEFAULT_PADDING, 0,0))
 		.font(FontManager.getRunescapeSmallFont())
@@ -48,7 +42,6 @@ public class ForestryPluginPanel extends PluginPanel
 		.build();
 
 	private final JPanel timerListPanel = new GridBagPanelBuilder()
-		.background(Color.RED)
 		.build();
 
 	@Inject
@@ -96,8 +89,6 @@ public class ForestryPluginPanel extends PluginPanel
 	}
 
 	public void update() {
-		currentTreePanel.update();
-
 		var unknownKeys = new HashSet<>(timerPanelsByHash.keySet());
 
 		for (var timer : service.getTreeTimers()) {
@@ -108,6 +99,9 @@ public class ForestryPluginPanel extends PluginPanel
 			var panel = new TreeTimerPanel(timer, itemManager);
 			timerPanelsByHash.put(key, panel);
 			timerListPanel.add(panel, GridBagConstraintsBuilder.verticalRelative());
+
+			timerListPanel.revalidate();
+			timerListPanel.repaint();
 		}
 
 		for (var removedPanelHash : unknownKeys) {
@@ -116,8 +110,12 @@ public class ForestryPluginPanel extends PluginPanel
 
 			timerListPanel.remove(panel);
 			timerPanelsByHash.remove(removedPanelHash);
+
+			timerListPanel.revalidate();
+			timerListPanel.repaint();
 		}
 
 		timerPanelsByHash.values().forEach(TreeTimerPanel::update);
+
 	}
 }

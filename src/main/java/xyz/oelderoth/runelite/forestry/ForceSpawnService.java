@@ -9,7 +9,14 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import lombok.Getter;
 import lombok.val;
-import net.runelite.api.*;
+import net.runelite.api.AnimationID;
+import net.runelite.api.Client;
+import net.runelite.api.GameObject;
+import net.runelite.api.GameState;
+import net.runelite.api.Player;
+import net.runelite.api.ScriptID;
+import net.runelite.api.Tile;
+import net.runelite.api.TileObject;
 import net.runelite.api.coords.Angle;
 import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
@@ -25,10 +32,14 @@ import xyz.oelderoth.runelite.forestry.domain.PlayerState;
 import xyz.oelderoth.runelite.forestry.domain.TreeType;
 import xyz.oelderoth.runelite.forestry.domain.TreeTimer;
 import xyz.oelderoth.runelite.forestry.domain.WoodcuttingState;
+import xyz.oelderoth.runelite.forestry.ui.CurrentTreePanel;
 
 @Singleton
 public class ForceSpawnService
 {
+	@Inject
+	private CurrentTreePanel currentTreePanel;
+
 	@Inject
 	private Client client;
 
@@ -59,19 +70,14 @@ public class ForceSpawnService
 	private void onGameStateChanged(GameStateChanged e)
 	{
 		if (e.getGameState() != GameState.HOPPING && e.getGameState() == GameState.LOGIN_SCREEN)
-		{
 			return;
-		}
 		if (playerState == PlayerState.NotWoodcutting || woodcuttingState == null)
-		{
 			return;
-		}
-		if ((client.getTickCount() - woodcuttingState.getStartTick()) < 4)
-		{
+		if ((client.getTickCount() - woodcuttingState.getStartTick()) < ForceSpawnService.MIN_TICK_COUNT)
 			return;
-		}
 
 		treeTimers.add(new TreeTimer(client.getWorld(), woodcuttingState.getGameObject(), woodcuttingState.getTreeType(), woodcuttingState.getStartTimeMs()));
+		onStopCutTree();
 	}
 
 	@Subscribe
@@ -86,21 +92,29 @@ public class ForceSpawnService
 
 			if (playerState == PlayerState.Woodcutting && woodcuttingState != null)
 			{
-				val isSameTree = facingTree.map(TileObject::getHash).filter(it -> it == woodcuttingState.getGameObject().getHash()).isPresent();
-				if (isSameTree)
+				val isSameTree = facingTree.map(TileObject::getHash)
+					.filter(it -> it == woodcuttingState.getGameObject()
+						.getHash())
+					.isPresent();
+				if (!isSameTree)
 				{
-					return;
+					removeTimer(woodcuttingState.getGameObject());
+					onStopCutTree();
+					facingTree.ifPresent(this::onStartCutTree);
 				}
-
-				onStopCutTree(woodcuttingState.getGameObject());
 			}
-
-			facingTree.ifPresent(this::onStartCutTree);
+			else
+			{
+				facingTree.ifPresent(this::onStartCutTree);
+			}
 		}
 		else if (playerState == PlayerState.Woodcutting && woodcuttingState != null)
 		{
-			onStopCutTree(woodcuttingState.getGameObject());
+			removeTimer(woodcuttingState.getGameObject());
+			onStopCutTree();
 		}
+
+		currentTreePanel.update();
 	}
 
 	@Subscribe
@@ -108,7 +122,8 @@ public class ForceSpawnService
 	{
 		if (scriptPreFired.getScriptId() == ScriptID.ADD_OVERLAYTIMER_LOC)
 		{
-			val args = scriptPreFired.getScriptEvent().getArguments();
+			val args = scriptPreFired.getScriptEvent()
+				.getArguments();
 			val locCoord = (int) args[1];
 			val locType = (int) args[4];
 
@@ -116,7 +131,7 @@ public class ForceSpawnService
 			{ // Tree despawned
 				val worldPoint = WorldPoint.fromCoord(locCoord);
 				val eventTreeOpt = getTreeFromCoord(worldPoint);
-				eventTreeOpt.ifPresent(eventTree -> treeTimers.removeIf(timer -> timer.getWorld() == client.getWorld() && timer.getGameObject().getHash() == eventTree.getHash()));
+				eventTreeOpt.ifPresent(this::removeTimer);
 			}
 		}
 	}
@@ -149,10 +164,15 @@ public class ForceSpawnService
 	private Optional<GameObject> getTreeFromCoord(WorldPoint worldPoint)
 	{
 		return Optional.ofNullable(
-			LocalPoint.fromWorld(client.getTopLevelWorldView(), worldPoint))
-			.map(localPoint -> client.getTopLevelWorldView().getScene().getTiles()[worldPoint.getPlane()][localPoint.getSceneX()][localPoint.getSceneY()])
+				LocalPoint.fromWorld(client.getTopLevelWorldView(), worldPoint))
+			.map(localPoint -> client.getTopLevelWorldView()
+				.getScene()
+				.getTiles()[worldPoint.getPlane()][localPoint.getSceneX()][localPoint.getSceneY()])
 			.map(Tile::getGameObjects)
-			.flatMap(objects -> Arrays.stream(objects).filter(it -> TreeType.getTreeTypeOf(it).isPresent()).findFirst());
+			.flatMap(objects -> Arrays.stream(objects)
+				.filter(it -> TreeType.getTreeTypeOf(it)
+					.isPresent())
+				.findFirst());
 	}
 
 	private void onStartCutTree(GameObject gameObject)
@@ -164,13 +184,19 @@ public class ForceSpawnService
 		}
 
 		playerState = PlayerState.Woodcutting;
-		woodcuttingState = new WoodcuttingState(tree.get(), gameObject, client.getTickCount(), Instant.now().toEpochMilli());
+		woodcuttingState = new WoodcuttingState(tree.get(), gameObject, client.getTickCount(), Instant.now()
+			.toEpochMilli());
 	}
 
-	private void onStopCutTree(GameObject gameObject)
+	private void onStopCutTree()
 	{
-		treeTimers.removeIf(it -> it.getGameObject().getHash() == gameObject.getHash() && it.getWorld() == client.getWorld());
 		playerState = PlayerState.NotWoodcutting;
+		woodcuttingState = null;
+	}
+
+	private void removeTimer(GameObject gameObject) {
+		treeTimers.removeIf(timer -> timer.getWorld() == client.getWorld() && timer.getGameObject()
+			.getHash() == gameObject.getHash());
 	}
 
 	public static final int MIN_TICK_COUNT = 4;
