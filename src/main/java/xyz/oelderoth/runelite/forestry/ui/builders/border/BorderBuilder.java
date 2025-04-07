@@ -9,6 +9,10 @@ import xyz.oelderoth.runelite.forestry.ui.PluginScheme;
 @SuppressWarnings("unused")
 public class BorderBuilder
 {
+	public static Border empty() {
+		 return empty(0);
+	}
+
 	public static Border empty(int amount)
 	{
 		return empty(amount, amount);
