@@ -16,6 +16,7 @@ import xyz.oelderoth.runelite.forestry.domain.TreeTimer;
 import xyz.oelderoth.runelite.forestry.ui.builders.border.BorderBuilder;
 import xyz.oelderoth.runelite.forestry.ui.builders.component.ClickFilter;
 import xyz.oelderoth.runelite.forestry.ui.builders.component.LabelBuilder;
+import xyz.oelderoth.runelite.forestry.ui.builders.component.MenuItemBuilder;
 import xyz.oelderoth.runelite.forestry.ui.builders.panel.BorderPanelBuilder;
 import xyz.oelderoth.runelite.forestry.ui.builders.panel.GridBagConstraintsBuilder;
 import xyz.oelderoth.runelite.forestry.ui.builders.panel.GridBagPanelBuilder;
@@ -95,6 +96,14 @@ public class TreeTimerPanel extends JPanel
 		BorderPanelBuilder.fromPanel(this)
 			.addCenter(mainPanel)
 			.addSouth(progressBar)
+			.menuItem(new MenuItemBuilder()
+				.text("Remove timer")
+				.actionListener(e -> onDeleteRequested.run())
+				.build())
+			.menuItem(new MenuItemBuilder()
+				.text("Hop to world " + timer.getWorld())
+				.actionListener(e -> hopService.hopToWorld(timer.getWorld()))
+				.build())
 			.build();
 
 		update();

@@ -15,6 +15,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.function.BiConsumer;
 import javax.swing.JComponent;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import org.intellij.lang.annotations.MagicConstant;
@@ -31,6 +33,7 @@ public abstract class AbstractComponentBuilder<T extends JComponent, B extends A
 	private Rectangle bounds;
 	private Dimension preferredSize;
 	private String tooltipText;
+	private JPopupMenu popupMenu;
 	private final List<BiConsumer<MouseEvent, T>> onMouseEntered = new ArrayList<>();
 	private final List<BiConsumer<MouseEvent, T>> onMouseExited = new ArrayList<>();
 	private final HashMap<ClickFilter, List<BiConsumer<MouseEvent, T>>> onClick = new HashMap<>();
@@ -92,6 +95,17 @@ public abstract class AbstractComponentBuilder<T extends JComponent, B extends A
 
 	public B preferredSize(int w, int h) {
 		return preferredSize(new Dimension(w, h));
+	}
+
+	public B popupMenu(JPopupMenu popupMenu) {
+		this.popupMenu = popupMenu;
+		return (B) this;
+	}
+
+	public B menuItem(JMenuItem menuItem) {
+		if (this.popupMenu == null) popupMenu = new JPopupMenu();
+		popupMenu.add(menuItem);
+			return (B) this;
 	}
 
 	public B onMouseEntered(BiConsumer<MouseEvent, T> handler) {
@@ -246,6 +260,8 @@ public abstract class AbstractComponentBuilder<T extends JComponent, B extends A
 			component.setPreferredSize(preferredSize);
 		if (cursor != null)
 			component.setCursor(cursor);
+		if (popupMenu != null)
+			component.setComponentPopupMenu(popupMenu);
 		if (hasAnyClickHandlers()) {
 			component.addMouseListener(buildMouseListener(component));
 		}
