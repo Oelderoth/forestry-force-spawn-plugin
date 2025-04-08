@@ -4,10 +4,15 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
+import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.World;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.widgets.ComponentID;
+import net.runelite.client.chat.ChatColorType;
+import net.runelite.client.chat.ChatMessageBuilder;
+import net.runelite.client.chat.ChatMessageManager;
+import net.runelite.client.chat.QueuedMessage;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.WorldService;
@@ -28,6 +33,9 @@ public class WorldHopService
 	@Inject
 	private WorldService worldService;
 
+	@Inject
+	private ChatMessageManager chatMessageManager;
+
 	public void enable()
 	{
 		eventBus.register(this);
@@ -43,7 +51,25 @@ public class WorldHopService
 
 	public void hopToWorld(int worldId)
 	{
-		getWorldById(worldId).ifPresent(world -> targetWorld = world);
+		var worldOpt = getWorldById(worldId);
+		if (worldOpt.isEmpty())
+		{
+			resetHop();
+			return;
+		}
+
+		var world = worldOpt.get();
+
+		printMessageToChat(new ChatMessageBuilder()
+			.append(ChatColorType.NORMAL)
+			.append("Quick-hopping to World ")
+			.append(ChatColorType.HIGHLIGHT)
+			.append(Integer.toString(world.getId()))
+			.append(ChatColorType.NORMAL)
+			.append("..")
+			.build());
+
+		targetWorld = world;
 	}
 
 	private Optional<World> getWorldById(int worldId)
@@ -77,15 +103,31 @@ public class WorldHopService
 		{
 			client.openWorldHopper();
 
-			if (retryAttempts++ >= MAX_RETRY_ATTEMPTS)
+			if (++retryAttempts >= MAX_RETRY_ATTEMPTS)
 			{
 				resetHop();
-				log.error("Failed to hop to target world");
+				printMessageToChat(new ChatMessageBuilder()
+					.append(ChatColorType.NORMAL)
+					.append("Failed to quick-hop after ")
+					.append(ChatColorType.HIGHLIGHT)
+					.append(Integer.toString(retryAttempts))
+					.append(ChatColorType.NORMAL)
+					.append(" attempts.")
+					.build());
 			}
 		}
 		else
 		{
 			client.hopToWorld(targetWorld);
+			targetWorld = null;
 		}
+	}
+
+	private void printMessageToChat(String chatMessage) {
+		chatMessageManager
+			.queue(QueuedMessage.builder()
+				.type(ChatMessageType.CONSOLE)
+				.runeLiteFormattedMessage(chatMessage)
+				.build());
 	}
 }
