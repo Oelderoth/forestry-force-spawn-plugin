@@ -98,7 +98,6 @@ public class ForceSpawnService
 					.isPresent();
 				if (!isSameTree)
 				{
-					removeTimer(woodcuttingState.getGameObject());
 					onStopCutTree();
 					facingTree.ifPresent(this::onStartCutTree);
 				}
@@ -110,7 +109,6 @@ public class ForceSpawnService
 		}
 		else if (playerState == PlayerState.Woodcutting && woodcuttingState != null)
 		{
-			removeTimer(woodcuttingState.getGameObject());
 			onStopCutTree();
 		}
 
