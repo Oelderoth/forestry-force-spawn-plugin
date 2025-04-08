@@ -1,5 +1,8 @@
 package xyz.oelderoth.runelite.forestry.ui;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.swing.JLabel;
@@ -71,17 +74,36 @@ public class CurrentTreePanel extends JPanel
 			{
 				itemManager.getImage(wcStatus.getTreeType().getItemId()).addTo(icon);
 				titleLabel.setText(wcStatus.getTreeType() + " Tree");
-				var ticks = client.getTickCount() - wcStatus.getStartTick();
-				var remaining = ForceSpawnService.MIN_TICK_COUNT - ticks;
-				if (remaining > 0)
-				{
-					hintLabel.setText("Cut for " + remaining + " ticks before hopping");
-					hintLabel.setForeground(PluginScheme.HINT_COLOR);
-				}
-				else
-				{
-					hintLabel.setText("Ready to hop");
-					hintLabel.setForeground(PluginScheme.SUCCESS_COLOR);
+
+				var existingTimerOpt = service.getTreeTimers().stream().filter(it -> it.getGameObject().getHash() == wcStatus.getGameObject().getHash() && it.getWorld() == client.getWorld()).findAny();
+				if (existingTimerOpt.isEmpty()) {
+					var ticks = client.getTickCount() - wcStatus.getStartTick();
+					var remaining = ForceSpawnService.MIN_TICK_COUNT - ticks;
+					if (remaining > 0)
+					{
+						hintLabel.setText("Cut for " + remaining + " ticks before hopping");
+						hintLabel.setForeground(PluginScheme.HINT_COLOR);
+					}
+					else
+					{
+						hintLabel.setText("Ready to hop");
+						hintLabel.setForeground(PluginScheme.SUCCESS_COLOR);
+					}
+				} else {
+					var timer = existingTimerOpt.get();
+					var elapsed = Instant.now().toEpochMilli() - timer.getStartTimeMs();
+					var remaining = timer.getTreeType().getDespawnDurationMs() - elapsed;
+					if (remaining > 0)
+					{
+						var duration = Duration.of(remaining, ChronoUnit.MILLIS);
+						hintLabel.setText(String.format("Ready to harvest in %02d:%02d", duration.toMinutesPart(), duration.toSecondsPart()));
+						hintLabel.setForeground(PluginScheme.INCOMPLETE_COLOR);
+					}
+					else
+					{
+						hintLabel.setText("Ready to harvest");
+						hintLabel.setForeground(PluginScheme.SUCCESS_COLOR);
+					}
 				}
 			}
 		}
