@@ -19,6 +19,7 @@ import xyz.oelderoth.runelite.forestry.ui.builders.component.LabelBuilder;
 import xyz.oelderoth.runelite.forestry.ui.builders.panel.BorderPanelBuilder;
 import xyz.oelderoth.runelite.forestry.ui.builders.panel.GridBagConstraintsBuilder;
 import xyz.oelderoth.runelite.forestry.ui.builders.panel.GridBagPanelBuilder;
+import xyz.oelderoth.runelite.forestry.ui.icons.Icons;
 
 @Slf4j
 public class TreeTimerPanel extends JPanel
@@ -32,9 +33,10 @@ public class TreeTimerPanel extends JPanel
 
 	private final ThinProgressBar progressBar = new ThinProgressBar();
 
-	public TreeTimerPanel(TreeTimer timer, ItemManager itemManager, WorldHopService hopService)
+	public TreeTimerPanel(TreeTimer timer, ItemManager itemManager, WorldHopService hopService, Runnable onDeleteRequested)
 	{
 		this.timer = timer;
+
 		progressBar.setValue(0);
 		progressBar.setMaximumValue(timer.getTreeType()
 			.getDespawnDurationMs());
@@ -51,6 +53,14 @@ public class TreeTimerPanel extends JPanel
 			.text(timer.getTreeType() + " Tree")
 			.build();
 
+		var deleteLabel = new LabelBuilder()
+			.icon(Icons.TRASH)
+			.onMouseEntered((e, c) -> c.setIcon(Icons.TRASH_HOVER))
+			.onMouseExited((e, c) -> c.setIcon(Icons.TRASH))
+			.onClick((e, c) -> onDeleteRequested.run())
+			.tooltipText("Delete timer")
+			.build();
+
 		var worldLabel = new LabelBuilder()
 			.foreground(PluginScheme.HINT_COLOR)
 			.font(FontManager.getRunescapeSmallFont())
@@ -65,10 +75,13 @@ public class TreeTimerPanel extends JPanel
 
 		var infoPanel = new GridBagPanelBuilder()
 			.constraints(GridBagConstraintsBuilder.verticalRelative(2))
-			.add(treeTypeLabel)
+			.add(new BorderPanelBuilder()
+				.addWest(treeTypeLabel)
+				.addEast(worldLabel)
+				.build())
 			.add(new BorderPanelBuilder()
 				.addWest(estimateLabel)
-				.addEast(worldLabel)
+				.addEast(deleteLabel)
 				.build())
 			.build();
 

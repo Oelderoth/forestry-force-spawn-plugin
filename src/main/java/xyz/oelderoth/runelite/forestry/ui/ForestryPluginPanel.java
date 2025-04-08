@@ -100,7 +100,7 @@ public class ForestryPluginPanel extends PluginPanel
 			unknownKeys.remove(key);
 			if (timerPanelsByHash.containsKey(key)) continue;
 
-			var panel = new TreeTimerPanel(timer, itemManager, worldHopService);
+			var panel = new TreeTimerPanel(timer, itemManager, worldHopService, () -> service.getTreeTimers().remove(timer));
 			timerPanelsByHash.put(key, panel);
 			timerListPanel.add(panel, GridBagConstraintsBuilder.verticalRelative());
 
