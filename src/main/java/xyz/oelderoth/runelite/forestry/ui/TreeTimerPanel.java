@@ -11,6 +11,7 @@ import net.runelite.api.Constants;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.components.ThinProgressBar;
+import xyz.oelderoth.runelite.forestry.ForestryPluginConfig;
 import xyz.oelderoth.runelite.forestry.WorldHopService;
 import xyz.oelderoth.runelite.forestry.domain.TreeTimer;
 import xyz.oelderoth.runelite.forestry.ui.builders.border.BorderBuilder;
@@ -25,6 +26,7 @@ import xyz.oelderoth.runelite.forestry.ui.icons.Icons;
 @Slf4j
 public class TreeTimerPanel extends JPanel
 {
+	private final ForestryPluginConfig config;
 	private final TreeTimer timer;
 
 	private final JLabel estimateLabel = new LabelBuilder()
@@ -34,14 +36,15 @@ public class TreeTimerPanel extends JPanel
 
 	private final ThinProgressBar progressBar = new ThinProgressBar();
 
-	public TreeTimerPanel(TreeTimer timer, ItemManager itemManager, WorldHopService hopService, Runnable onDeleteRequested)
+	public TreeTimerPanel(TreeTimer timer, ItemManager itemManager, WorldHopService hopService, Runnable onDeleteRequested, ForestryPluginConfig config)
 	{
+		this.config = config;
 		this.timer = timer;
 
 		progressBar.setValue(0);
 		progressBar.setMaximumValue(timer.getTreeType()
 			.getDespawnDurationMs());
-		progressBar.setForeground(PluginScheme.INCOMPLETE_COLOR);
+		progressBar.setForeground(config.inProgressOutline());
 
 		var icon = new LabelBuilder()
 			.bounds(0, 0, Constants.ITEM_SPRITE_WIDTH, Constants.ITEM_SPRITE_HEIGHT)
@@ -59,6 +62,7 @@ public class TreeTimerPanel extends JPanel
 			.onMouseEntered((e, c) -> c.setIcon(Icons.TRASH_HOVER))
 			.onMouseExited((e, c) -> c.setIcon(Icons.TRASH))
 			.onClick((e, c) -> onDeleteRequested.run())
+			.cursor(Cursor.HAND_CURSOR)
 			.tooltipText("Delete timer")
 			.build();
 
@@ -120,11 +124,11 @@ public class TreeTimerPanel extends JPanel
 		if (remaining <= 0)
 		{
 			estimateLabel.setText("Ready to harvest");
-			estimateLabel.setForeground(PluginScheme.SUCCESS_COLOR);
+			estimateLabel.setForeground(config.completedOutline());
 
 			progressBar.setValue(timer.getTreeType()
 				.getDespawnDurationMs());
-			progressBar.setForeground(PluginScheme.SUCCESS_COLOR);
+			progressBar.setForeground(config.completedOutline());
 		}
 		else
 		{
@@ -133,7 +137,7 @@ public class TreeTimerPanel extends JPanel
 			estimateLabel.setForeground(PluginScheme.HINT_COLOR);
 
 			progressBar.setValue((int) elapsed);
-			progressBar.setForeground(PluginScheme.INCOMPLETE_COLOR);
+			progressBar.setForeground(config.inProgressOutline());
 		}
 	}
 }

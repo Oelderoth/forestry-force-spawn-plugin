@@ -3,7 +3,6 @@ package xyz.oelderoth.runelite.forestry.ui.icons;
 import javax.swing.ImageIcon;
 import net.runelite.client.util.ImageUtil;
 
-@SuppressWarnings("unused")
 public class Icons
 {
 	public static ImageIcon TRASH;

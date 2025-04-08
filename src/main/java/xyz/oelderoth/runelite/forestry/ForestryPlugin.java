@@ -1,9 +1,12 @@
 package xyz.oelderoth.runelite.forestry;
 
+import com.google.inject.Provides;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import net.runelite.client.config.ConfigManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.ClientToolbar;
@@ -35,8 +38,15 @@ public class ForestryPlugin extends Plugin
 	@Inject
 	private ScheduledExecutorService executorService;
 
+	@Getter
+	private static ForestryPlugin instance;
+
 	private ForestryPluginPanel pluginPanel;
 	private ScheduledFuture<?> panelUpdateFuture;
+
+	public ForestryPlugin() {
+		instance = this;
+	}
 
 	@Override
 	protected void startUp()
@@ -52,7 +62,7 @@ public class ForestryPlugin extends Plugin
 	}
 
 	@Override
-	public void shutDown()
+	protected void shutDown()
 	{
 		forceSpawnService.disable();
 		worldHopService.disable();
@@ -65,4 +75,7 @@ public class ForestryPlugin extends Plugin
 		}
 		pluginPanel = null;
 	}
+
+	@Provides
+	private ForestryPluginConfig getConfig(ConfigManager configManager) { return configManager.getConfig(ForestryPluginConfig.class); }
 }

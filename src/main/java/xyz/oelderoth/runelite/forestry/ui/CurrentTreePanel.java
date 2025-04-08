@@ -12,6 +12,7 @@ import net.runelite.api.Constants;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.FontManager;
 import xyz.oelderoth.runelite.forestry.ForceSpawnService;
+import xyz.oelderoth.runelite.forestry.ForestryPluginConfig;
 import xyz.oelderoth.runelite.forestry.domain.PlayerState;
 import xyz.oelderoth.runelite.forestry.ui.builders.border.BorderBuilder;
 import xyz.oelderoth.runelite.forestry.ui.builders.component.LabelBuilder;
@@ -30,6 +31,9 @@ public class CurrentTreePanel extends JPanel
 
 	@Inject
 	private ItemManager itemManager;
+
+	@Inject
+	private ForestryPluginConfig config;
 
 	private final JLabel titleLabel = new LabelBuilder()
 		.font(FontManager.getRunescapeSmallFont())
@@ -87,7 +91,7 @@ public class CurrentTreePanel extends JPanel
 					else
 					{
 						hintLabel.setText("Ready to hop");
-						hintLabel.setForeground(PluginScheme.SUCCESS_COLOR);
+						hintLabel.setForeground(config.completedOutline());
 					}
 				} else {
 					var timer = existingTimerOpt.get();
@@ -97,12 +101,12 @@ public class CurrentTreePanel extends JPanel
 					{
 						var duration = Duration.of(remaining, ChronoUnit.MILLIS);
 						hintLabel.setText(String.format("Ready to harvest in %02d:%02d", duration.toMinutesPart(), duration.toSecondsPart()));
-						hintLabel.setForeground(PluginScheme.INCOMPLETE_COLOR);
+						hintLabel.setForeground(config.inProgressOutline());
 					}
 					else
 					{
 						hintLabel.setText("Ready to harvest");
-						hintLabel.setForeground(PluginScheme.SUCCESS_COLOR);
+						hintLabel.setForeground(config.completedOutline());
 					}
 				}
 			}

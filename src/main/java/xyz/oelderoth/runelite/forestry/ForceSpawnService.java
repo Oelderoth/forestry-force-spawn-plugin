@@ -46,6 +46,9 @@ public class ForceSpawnService
 	@Inject
 	private EventBus eventBus;
 
+	@Inject
+	private ForestryPluginConfig config;
+
 	@Getter
 	private PlayerState playerState = PlayerState.NotWoodcutting;
 
@@ -113,6 +116,11 @@ public class ForceSpawnService
 		}
 
 		currentTreePanel.update();
+
+		if (config.removeTimersAfter() > 0) {
+			var now = Instant.now().toEpochMilli();
+			treeTimers.removeIf(timer -> (now - timer.getStartTimeMs() - timer.getTreeType().getDespawnDurationMs()) > (config.removeTimersAfter() * 60000L));
+		}
 	}
 
 	@Subscribe
