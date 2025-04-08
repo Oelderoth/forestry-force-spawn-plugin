@@ -16,6 +16,7 @@ import net.runelite.client.util.ImageUtil;
 import org.apache.commons.lang3.tuple.Pair;
 import xyz.oelderoth.runelite.forestry.ForceSpawnService;
 import xyz.oelderoth.runelite.forestry.ForestryPlugin;
+import xyz.oelderoth.runelite.forestry.WorldHopService;
 import xyz.oelderoth.runelite.forestry.ui.builders.component.LabelBuilder;
 import xyz.oelderoth.runelite.forestry.ui.builders.panel.BorderPanelBuilder;
 import xyz.oelderoth.runelite.forestry.ui.builders.panel.GridBagConstraintsBuilder;

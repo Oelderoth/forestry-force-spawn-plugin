@@ -27,6 +27,9 @@ public class ForestryPlugin extends Plugin
 	private ForceSpawnOverlay forceSpawnOverlay;
 
 	@Inject
+	private WorldHopService worldHopService;
+
+	@Inject
 	private OverlayManager overlayManager;
 
 	@Inject
@@ -42,9 +45,9 @@ public class ForestryPlugin extends Plugin
 		if (pluginPanel == null) pluginPanel = injector.getInstance(ForestryPluginPanel.class);
 
 		forceSpawnService.enable();
+		worldHopService.enable();
 		overlayManager.add(forceSpawnOverlay);
 		clientToolbar.addNavigation(pluginPanel.getNavigationButton());
-
 		panelUpdateFuture = executorService.scheduleAtFixedRate(pluginPanel::update, 200, 200, TimeUnit.MILLISECONDS);
 	}
 
@@ -52,6 +55,7 @@ public class ForestryPlugin extends Plugin
 	public void shutDown()
 	{
 		forceSpawnService.disable();
+		worldHopService.disable();
 		overlayManager.remove(forceSpawnOverlay);
 		clientToolbar.removeNavigation(pluginPanel.getNavigationButton());
 		if (panelUpdateFuture != null)
