@@ -14,6 +14,7 @@ import net.runelite.client.ui.components.ThinProgressBar;
 import xyz.oelderoth.runelite.forestry.WorldHopService;
 import xyz.oelderoth.runelite.forestry.domain.TreeTimer;
 import xyz.oelderoth.runelite.forestry.ui.builders.border.BorderBuilder;
+import xyz.oelderoth.runelite.forestry.ui.builders.component.ClickFilter;
 import xyz.oelderoth.runelite.forestry.ui.builders.component.LabelBuilder;
 import xyz.oelderoth.runelite.forestry.ui.builders.panel.BorderPanelBuilder;
 import xyz.oelderoth.runelite.forestry.ui.builders.panel.GridBagConstraintsBuilder;
@@ -56,8 +57,10 @@ public class TreeTimerPanel extends JPanel
 			.text("World " + timer.getWorld())
 			.tooltipText("Hop to world " + timer.getWorld())
 			.cursor(Cursor.HAND_CURSOR)
-			.onHover((label, hovering) -> label.setForeground(hovering ? PluginScheme.HINT_HOVER_COLOR : PluginScheme.HINT_COLOR))
-			.onLeftClick(() -> hopService.hopToWorld(timer.getWorld()))
+			.onMouseEntered((e, c) -> c.setForeground(PluginScheme.HINT_HOVER_COLOR))
+			.onMouseExited((e, c) -> c.setForeground(PluginScheme.HINT_COLOR))
+			.onMousePressed(ClickFilter.DOUBLE_CLICK, (e, c) -> c.setForeground(PluginScheme.HINT_CLICK_COLOR))
+			.onClick(ClickFilter.DOUBLE_CLICK, (e, c) -> hopService.hopToWorld(timer.getWorld()))
 			.build();
 
 		var infoPanel = new GridBagPanelBuilder()

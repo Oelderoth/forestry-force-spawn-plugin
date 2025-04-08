@@ -1,5 +1,6 @@
 package xyz.oelderoth.runelite.forestry.ui.builders.component;
 
+import com.google.common.collect.Lists;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -7,8 +8,12 @@ import java.awt.Font;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
@@ -26,8 +31,11 @@ public abstract class AbstractComponentBuilder<T extends JComponent, B extends A
 	private Rectangle bounds;
 	private Dimension preferredSize;
 	private String tooltipText;
-	private BiConsumer<T, Boolean> onHover;
-	private Consumer<T> onLeftClick;
+	private final List<BiConsumer<MouseEvent, T>> onMouseEntered = new ArrayList<>();
+	private final List<BiConsumer<MouseEvent, T>> onMouseExited = new ArrayList<>();
+	private final HashMap<ClickFilter, List<BiConsumer<MouseEvent, T>>> onClick = new HashMap<>();
+	private final HashMap<ClickFilter, List<BiConsumer<MouseEvent, T>>> onMousePressed = new HashMap<>();
+	private final HashMap<ClickFilter, List<BiConsumer<MouseEvent, T>>> onMouseReleased = new HashMap<>();
 
 	public B border(Border border)
 	{
@@ -86,26 +94,65 @@ public abstract class AbstractComponentBuilder<T extends JComponent, B extends A
 		return preferredSize(new Dimension(w, h));
 	}
 
-	public B onHover(BiConsumer<T, Boolean> handler) {
-		this.onHover = handler;
+	public B onMouseEntered(BiConsumer<MouseEvent, T> handler) {
+		this.onMouseEntered.add(handler);
 		return (B) this;
 	}
 
-	public B onHover(Consumer<Boolean> handler) {
-		return onHover((c, b) -> handler.accept(b));
-	}
-
-	public B onHover(Runnable handler) {
-		return onHover((c, b) -> handler.run());
-	}
-
-	public B onLeftClick(Consumer<T> handler) {
-		this.onLeftClick = handler;
+	public B onMouseExited(BiConsumer<MouseEvent, T> handler) {
+		this.onMouseExited.add(handler);
 		return (B) this;
 	}
 
-	public B onLeftClick(Runnable handler) {
-		return onLeftClick((c) -> handler.run());
+	public B onClick(BiConsumer<MouseEvent, T> handler) {
+		if (this.onClick.containsKey(null))
+			this.onClick.get(null).add(handler);
+		else
+			this.onClick.put(null, Lists.newArrayList(handler));
+		return (B) this;
+	}
+
+	public B onClick(ClickFilter filter, BiConsumer<MouseEvent, T> handler) {
+		if (this.onClick.containsKey(filter)) {
+			this.onClick.get(filter).add(handler);
+		} else {
+			this.onClick.put(filter, Lists.newArrayList(handler));
+		}
+		return (B) this;
+	}
+
+	public B onMousePressed(BiConsumer<MouseEvent, T> handler) {
+		if (this.onMousePressed.containsKey(null))
+			this.onMousePressed.get(null).add(handler);
+		else
+			this.onMousePressed.put(null, Lists.newArrayList(handler));
+		return (B) this;
+	}
+
+	public B onMousePressed(ClickFilter filter, BiConsumer<MouseEvent, T> handler) {
+		if (this.onMousePressed.containsKey(filter)) {
+			this.onMousePressed.get(filter).add(handler);
+		} else {
+			this.onMousePressed.put(filter, Lists.newArrayList(handler));
+		}
+		return (B) this;
+	}
+
+	public B onMouseReleased(BiConsumer<MouseEvent, T> handler) {
+		if (this.onMouseReleased.containsKey(null))
+			this.onMouseReleased.get(null).add(handler);
+		else
+			this.onMouseReleased.put(null, Lists.newArrayList(handler));
+		return (B) this;
+	}
+
+	public B onMouseReleased(ClickFilter filter, BiConsumer<MouseEvent, T> handler) {
+		if (this.onMouseReleased.containsKey(filter)) {
+			this.onMouseReleased.get(filter).add(handler);
+		} else {
+			this.onMouseReleased.put(filter, Lists.newArrayList(handler));
+		}
+		return (B) this;
 	}
 
 	public B tooltipText(String tooltipText) {
@@ -117,6 +164,68 @@ public abstract class AbstractComponentBuilder<T extends JComponent, B extends A
 	{
 		this.visible = visible;
 		return (B) this;
+	}
+
+	private boolean hasAnyClickHandlers() {
+		return !(onMouseEntered.isEmpty() && onMouseExited.isEmpty() && onClick.isEmpty());
+	}
+
+	private void invokeMouseHandlers(MouseEvent e, T component, HashMap<ClickFilter, List<BiConsumer<MouseEvent, T>>> handlers) {
+		if (SwingUtilities.isLeftMouseButton(e)) {
+			if (e.getClickCount() == 2) {
+				handlers.getOrDefault(ClickFilter.DOUBLE_CLICK, Collections.emptyList())
+					.forEach(it -> it.accept(e, component));
+			} else {
+				handlers.getOrDefault(ClickFilter.LEFT_CLICK, Collections.emptyList())
+					.forEach(it -> it.accept(e, component));
+			}
+		}
+		if (SwingUtilities.isRightMouseButton(e)) {
+			handlers.getOrDefault(ClickFilter.RIGHT_CLICK, Collections.emptyList())
+				.forEach(it -> it.accept(e, component));
+		}
+		if (SwingUtilities.isMiddleMouseButton(e)) {
+			handlers.getOrDefault(ClickFilter.MIDDLE_CLICK, Collections.emptyList())
+				.forEach(it -> it.accept(e, component));
+		}
+
+		handlers.getOrDefault(null, Collections.emptyList())
+			.forEach(it -> it.accept(e, component));
+	}
+
+	private MouseListener buildMouseListener(T component) {
+		return new MouseAdapter()
+		{
+			@Override
+			public void mousePressed(MouseEvent e)
+			{
+				invokeMouseHandlers(e, component, onMousePressed);
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e)
+			{
+				invokeMouseHandlers(e, component, onMouseReleased);
+			}
+
+			@Override
+			public void mouseClicked(MouseEvent e)
+			{
+				invokeMouseHandlers(e, component, onClick);
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e)
+			{
+				onMouseEntered.forEach(it -> it.accept(e, component));
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e)
+			{
+				onMouseExited.forEach(it -> it.accept(e, component));
+			}
+		};
 	}
 
 	public T apply(T component)
@@ -137,32 +246,8 @@ public abstract class AbstractComponentBuilder<T extends JComponent, B extends A
 			component.setPreferredSize(preferredSize);
 		if (cursor != null)
 			component.setCursor(cursor);
-		if (onHover != null || onLeftClick != null) {
-			component.addMouseListener(new MouseAdapter()
-			{
-				@Override
-				public void mousePressed(MouseEvent e)
-				{
-					if (SwingUtilities.isLeftMouseButton(e)) {
-						if (onLeftClick != null)
-							onLeftClick.accept(component);
-					}
-				}
-
-				@Override
-				public void mouseEntered(MouseEvent e)
-				{
-					if (onHover != null)
-						onHover.accept(component, true);
-				}
-
-				@Override
-				public void mouseExited(MouseEvent e)
-				{
-					if (onHover != null)
-						onHover.accept(component, false);
-				}
-			});
+		if (hasAnyClickHandlers()) {
+			component.addMouseListener(buildMouseListener(component));
 		}
 
 		return component;
