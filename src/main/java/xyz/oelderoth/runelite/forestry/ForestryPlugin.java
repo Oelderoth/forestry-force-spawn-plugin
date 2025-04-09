@@ -14,6 +14,8 @@ import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.overlay.OverlayManager;
 import javax.inject.Inject;
+import xyz.oelderoth.runelite.forestry.service.ForceSpawnService;
+import xyz.oelderoth.runelite.forestry.service.WorldHopService;
 import xyz.oelderoth.runelite.forestry.ui.ForestryPluginPanel;
 
 @PluginDescriptor(name = ForestryPlugin.PLUGIN_NAME, description = "A plugin to help with force spawning Forestry events")

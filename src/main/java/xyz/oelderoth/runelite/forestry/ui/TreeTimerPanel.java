@@ -12,7 +12,7 @@ import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.components.ThinProgressBar;
 import xyz.oelderoth.runelite.forestry.ForestryPluginConfig;
-import xyz.oelderoth.runelite.forestry.WorldHopService;
+import xyz.oelderoth.runelite.forestry.service.WorldHopService;
 import xyz.oelderoth.runelite.forestry.domain.TreeTimer;
 import xyz.oelderoth.runelite.forestry.ui.builders.border.BorderBuilder;
 import xyz.oelderoth.runelite.forestry.ui.builders.component.ClickFilter;

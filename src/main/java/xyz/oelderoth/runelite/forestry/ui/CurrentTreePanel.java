@@ -11,7 +11,7 @@ import net.runelite.api.Client;
 import net.runelite.api.Constants;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.FontManager;
-import xyz.oelderoth.runelite.forestry.ForceSpawnService;
+import xyz.oelderoth.runelite.forestry.service.ForceSpawnService;
 import xyz.oelderoth.runelite.forestry.ForestryPluginConfig;
 import xyz.oelderoth.runelite.forestry.domain.PlayerState;
 import xyz.oelderoth.runelite.forestry.ui.builders.border.BorderBuilder;

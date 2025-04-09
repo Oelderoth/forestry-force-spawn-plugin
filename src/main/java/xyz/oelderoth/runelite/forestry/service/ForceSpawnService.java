@@ -1,4 +1,4 @@
-package xyz.oelderoth.runelite.forestry;
+package xyz.oelderoth.runelite.forestry.service;
 
 import com.google.common.collect.Sets;
 import java.util.ArrayList;
@@ -29,6 +29,7 @@ import java.time.Instant;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import net.runelite.client.events.ConfigChanged;
+import xyz.oelderoth.runelite.forestry.ForestryPluginConfig;
 import xyz.oelderoth.runelite.forestry.domain.PlayerState;
 import xyz.oelderoth.runelite.forestry.domain.TreeType;
 import xyz.oelderoth.runelite.forestry.domain.TreeTimer;

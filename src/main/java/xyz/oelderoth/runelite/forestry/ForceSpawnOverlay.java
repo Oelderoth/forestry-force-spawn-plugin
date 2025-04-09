@@ -12,6 +12,7 @@ import java.awt.Graphics2D;
 import java.time.Instant;
 import javax.inject.Inject;
 import xyz.oelderoth.runelite.forestry.domain.PlayerState;
+import xyz.oelderoth.runelite.forestry.service.ForceSpawnService;
 
 @Singleton
 public class ForceSpawnOverlay extends Overlay {

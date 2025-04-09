@@ -1,4 +1,4 @@
-package xyz.oelderoth.runelite.forestry;
+package xyz.oelderoth.runelite.forestry.service;
 
 import java.util.Optional;
 import javax.inject.Inject;
