@@ -22,8 +22,7 @@ import xyz.oelderoth.runelite.forestry.ui.CurrentTreePanel;
 @Singleton
 public class ForceSpawnService
 {
-	@Inject
-	private CurrentTreePanel currentTreePanel;
+	public static final int MIN_TICK_COUNT = 4;
 
 	@Inject
 	private Client client;
@@ -32,10 +31,16 @@ public class ForceSpawnService
 	private EventBus eventBus;
 
 	@Inject
+	private CurrentTreePanel currentTreePanel;
+
+	@Inject
 	private ForestryPluginConfig config;
 
 	@Inject
 	private WoodcuttingService woodcuttingService;
+
+	@Getter
+	private final List<TreeTimer> treeTimers = new ArrayList<>();
 
 	public void enable()
 	{
@@ -48,9 +53,6 @@ public class ForceSpawnService
 		eventBus.unregister(this);
 		woodcuttingService.unregisterTreeCutDownListener(this::removeTimer);
 	}
-
-	@Getter
-	private final List<TreeTimer> treeTimers = new ArrayList<>();
 
 	@Subscribe
 	private void onConfigChanged(ConfigChanged e) {
@@ -111,6 +113,4 @@ public class ForceSpawnService
 		treeTimers.removeIf(timer -> timer.getWorld() == client.getWorld() && timer.getGameObject()
 			.getHash() == gameObject.getHash());
 	}
-
-	public static final int MIN_TICK_COUNT = 4;
 }

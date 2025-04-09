@@ -23,19 +23,11 @@ import xyz.oelderoth.runelite.forestry.ui.builders.panel.GridBagPanelBuilder;
 @Singleton
 public class CurrentTreePanel extends JPanel
 {
-	@Inject
-	private ForceSpawnService forceSpawnService;
-
+	private final Client client;
+	private final ItemManager itemManager;
+	private final ForestryPluginConfig config;
+	private final ForceSpawnService forceSpawnService;
 	private final WoodcuttingService woodcuttingService;
-
-	@Inject
-	private Client client;
-
-	@Inject
-	private ItemManager itemManager;
-
-	@Inject
-	private ForestryPluginConfig config;
 
 	private final JLabel titleLabel = new LabelBuilder()
 		.font(FontManager.getRunescapeSmallFont())
@@ -54,8 +46,17 @@ public class CurrentTreePanel extends JPanel
 		.build();
 
 	@Inject
-	public CurrentTreePanel(WoodcuttingService woodcuttingService)
+	public CurrentTreePanel(
+		Client client,
+		ItemManager itemManager,
+		ForestryPluginConfig config,
+		ForceSpawnService forceSpawnService,
+		WoodcuttingService woodcuttingService)
 	{
+		this.client = client;
+		this.itemManager = itemManager;
+		this.config = config;
+		this.forceSpawnService = forceSpawnService;
 		this.woodcuttingService = woodcuttingService;
 
 		var infoPanel = new GridBagPanelBuilder()

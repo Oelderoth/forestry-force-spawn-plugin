@@ -25,16 +25,19 @@ public class WorldHopService
 	private static final int MAX_RETRY_ATTEMPTS = 3;
 
 	@Inject
-	private EventBus eventBus;
+	private ChatMessageManager chatMessageManager;
 
 	@Inject
 	private Client client;
 
 	@Inject
-	private WorldService worldService;
+	private EventBus eventBus;
 
 	@Inject
-	private ChatMessageManager chatMessageManager;
+	private WorldService worldService;
+
+	private World targetWorld = null;
+	private int retryAttempts = 0;
 
 	public void enable()
 	{
@@ -45,9 +48,6 @@ public class WorldHopService
 	{
 		eventBus.unregister(this);
 	}
-
-	private World targetWorld = null;
-	private int retryAttempts = 0;
 
 	public void hopToWorld(int worldId)
 	{
@@ -72,31 +72,9 @@ public class WorldHopService
 		targetWorld = world;
 	}
 
-	private Optional<World> getWorldById(int worldId)
-	{
-		return Optional.ofNullable(worldService.getWorlds())
-			.map(result -> result.findWorld(worldId))
-			.map(apiWorld -> {
-				var rsWorld = client.createWorld();
-				rsWorld.setActivity(apiWorld.getActivity());
-				rsWorld.setAddress(apiWorld.getAddress());
-				rsWorld.setId(apiWorld.getId());
-				rsWorld.setPlayerCount(apiWorld.getPlayers());
-				rsWorld.setLocation(apiWorld.getLocation());
-				rsWorld.setTypes(WorldUtil.toWorldTypes(apiWorld.getTypes()));
-
-				return rsWorld;
-			});
-	}
-
-	private void resetHop()
-	{
-		targetWorld = null;
-		retryAttempts = 0;
-	}
 
 	@Subscribe
-	public void onGameTick(GameTick gameTick)
+	private void onGameTick(GameTick gameTick)
 	{
 		if (targetWorld == null) return;
 		if (client.getWidget(ComponentID.WORLD_SWITCHER_WORLD_LIST) == null)
@@ -121,6 +99,29 @@ public class WorldHopService
 			client.hopToWorld(targetWorld);
 			targetWorld = null;
 		}
+	}
+
+	private Optional<World> getWorldById(int worldId)
+	{
+		return Optional.ofNullable(worldService.getWorlds())
+			.map(result -> result.findWorld(worldId))
+			.map(apiWorld -> {
+				var rsWorld = client.createWorld();
+				rsWorld.setActivity(apiWorld.getActivity());
+				rsWorld.setAddress(apiWorld.getAddress());
+				rsWorld.setId(apiWorld.getId());
+				rsWorld.setPlayerCount(apiWorld.getPlayers());
+				rsWorld.setLocation(apiWorld.getLocation());
+				rsWorld.setTypes(WorldUtil.toWorldTypes(apiWorld.getTypes()));
+
+				return rsWorld;
+			});
+	}
+
+	private void resetHop()
+	{
+		targetWorld = null;
+		retryAttempts = 0;
 	}
 
 	private void printMessageToChat(String chatMessage) {

@@ -32,9 +32,15 @@ import xyz.oelderoth.runelite.forestry.ui.builders.panel.GridBagConstraintsBuild
 import xyz.oelderoth.runelite.forestry.ui.builders.panel.GridBagPanelBuilder;
 import xyz.oelderoth.runelite.forestry.ui.icons.Icons;
 
-@Getter
 public class ForestryPluginPanel extends PluginPanel
 {
+	private final ItemManager itemManager;
+	private final ForestryPluginConfig config;
+	private ForceSpawnService forceSpawnService;
+	private final WorldHopService worldHopService;
+	private final CurrentTreePanel currentTreePanel;
+
+	@Getter
 	private final NavigationButton navigationButton = NavigationButton.builder()
 		.icon(ImageUtil.loadImageResource(ForestryPluginPanel.class, "/skill_icons_small/woodcutting.png"))
 		.tooltip(ForestryPlugin.PLUGIN_NAME)
@@ -42,8 +48,6 @@ public class ForestryPluginPanel extends PluginPanel
 		.panel(this)
 		.build();
 
-	private final CurrentTreePanel currentTreePanel;
-	private final Map<Pair<Long, Integer>, TreeTimerPanel> timerPanelsByHash = new HashMap<>();
 	private final JLabel timerHint = new LabelBuilder()
 		.border(new EmptyBorder(0, PluginScheme.DEFAULT_PADDING, 0,0))
 		.font(FontManager.getRunescapeSmallFont())
@@ -54,15 +58,6 @@ public class ForestryPluginPanel extends PluginPanel
 
 	private final JPanel timerListPanel = new GridBagPanelBuilder()
 		.build();
-
-	@Inject
-	private ForceSpawnService service;
-
-	@Inject
-	private ItemManager itemManager;
-
-	private final WorldHopService worldHopService;
-	private final ForestryPluginConfig config;
 
 	private final JLabel currentTreeTitle = new LabelBuilder()
 		.font(FontManager.getRunescapeSmallFont())
@@ -77,21 +72,31 @@ public class ForestryPluginPanel extends PluginPanel
 		.tooltipText("Delete All Timers")
 		.cursor(Cursor.HAND_CURSOR)
 		.onClick(ClickFilter.LEFT_CLICK, (e, c) -> {
-			if (service.getTreeTimers().isEmpty()) return;
+			if (forceSpawnService.getTreeTimers().isEmpty()) return;
 
 			int confirm = JOptionPane.showConfirmDialog(c,
 				"Are you sure you want to clear all active timers?",
 				"Warning", JOptionPane.OK_CANCEL_OPTION);
 
 			if (confirm == 0)
-				service.getTreeTimers().clear();
+				forceSpawnService.getTreeTimers().clear();
 		})
 		.build();
 
+	private final Map<Pair<Long, Integer>, TreeTimerPanel> timerPanelsByHash = new HashMap<>();
+
+
 	@Inject
-	public ForestryPluginPanel(CurrentTreePanel currentTreePanel, WorldHopService worldHopService, ForestryPluginConfig config)
+	public ForestryPluginPanel(
+		ItemManager itemManager,
+		ForestryPluginConfig config,
+		WorldHopService worldHopService,
+		ForceSpawnService forceSpawnService,
+		CurrentTreePanel currentTreePanel)
 	{
+		this.itemManager = itemManager;
 		this.currentTreePanel = currentTreePanel;
+		this.forceSpawnService = forceSpawnService;
 		this.worldHopService = worldHopService;
 		this.config = config;
 
@@ -137,7 +142,7 @@ public class ForestryPluginPanel extends PluginPanel
 			currentTreeTitle.setVisible(false);
 		}
 
-		var isNoActiveTimers = service.getTreeTimers().isEmpty();
+		var isNoActiveTimers = forceSpawnService.getTreeTimers().isEmpty();
 
 		deleteAllTimersButton.setVisible(!isNoActiveTimers);
 		timerHint.setVisible(config.showTimerHint() || isNoActiveTimers);
@@ -145,12 +150,12 @@ public class ForestryPluginPanel extends PluginPanel
 		var unknownKeys = new HashSet<>(timerPanelsByHash.keySet());
 		var panelOrderDirty = false;
 
-		for (var timer : service.getTreeTimers()) {
+		for (var timer : forceSpawnService.getTreeTimers()) {
 			var key = Pair.of(timer.getGameObject().getHash(), timer.getWorld());
 			unknownKeys.remove(key);
 			if (timerPanelsByHash.containsKey(key)) continue;
 
-			var panel = new TreeTimerPanel(timer, itemManager, worldHopService, () -> service.getTreeTimers().remove(timer), config);
+			var panel = new TreeTimerPanel(config, itemManager, worldHopService, timer, () -> forceSpawnService.getTreeTimers().remove(timer));
 			timerPanelsByHash.put(key, panel);
 
 			panelOrderDirty = true;
@@ -191,12 +196,12 @@ public class ForestryPluginPanel extends PluginPanel
 				return;
 		}
 
-		service.getTreeTimers()
+		forceSpawnService.getTreeTimers()
 			.sort(Comparator.comparing(extractor));
 
 		timerListPanel.removeAll();
 
-		for (var timer : service.getTreeTimers()) {
+		for (var timer : forceSpawnService.getTreeTimers()) {
 			var panel = timerPanelsByHash.get(Pair.of(timer.getGameObject().getHash(), timer.getWorld()));
 			if (panel != null)
 				timerListPanel.add(panel, GridBagConstraintsBuilder.verticalRelative());

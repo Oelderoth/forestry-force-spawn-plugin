@@ -24,6 +24,7 @@ import xyz.oelderoth.runelite.forestry.ui.ForestryPluginPanel;
 public class ForestryPlugin extends Plugin
 {
 	public static final String PLUGIN_NAME = "Forestry Spawn Helper";
+
 	@Getter
 	private static ForestryPlugin instance;
 

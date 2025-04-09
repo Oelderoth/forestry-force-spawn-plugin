@@ -36,7 +36,7 @@ public class TreeTimerPanel extends JPanel
 
 	private final ThinProgressBar progressBar = new ThinProgressBar();
 
-	public TreeTimerPanel(TreeTimer timer, ItemManager itemManager, WorldHopService hopService, Runnable onDeleteRequested, ForestryPluginConfig config)
+	public TreeTimerPanel(ForestryPluginConfig config, ItemManager itemManager, WorldHopService hopService, TreeTimer timer, Runnable onDeleteRequested)
 	{
 		this.config = config;
 		this.timer = timer;
