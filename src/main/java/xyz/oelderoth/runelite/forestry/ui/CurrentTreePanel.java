@@ -89,9 +89,7 @@ public class CurrentTreePanel extends JPanel
 
 			var existingTimerOpt = forceSpawnService.getTreeTimers()
 				.stream()
-				.filter(it -> it.getGameObject()
-					.getHash() == wcStatus.getGameObject()
-					.getHash() && it.getWorld() == client.getWorld())
+				.filter(it -> it.getTree().matches(wcStatus.getGameObject()) && it.getWorld() == client.getWorld())
 				.findAny();
 			if (existingTimerOpt.isEmpty())
 			{

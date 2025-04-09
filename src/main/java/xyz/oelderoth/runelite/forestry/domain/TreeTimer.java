@@ -1,12 +1,11 @@
 package xyz.oelderoth.runelite.forestry.domain;
 
 import lombok.Data;
-import net.runelite.api.GameObject;
 
 @Data
 public class TreeTimer
 {
-	private final GameObject gameObject;
+	private final TreeDefinition tree;
 	private final TreeType treeType;
 	private final long startTimeMs;
 	private final int world;

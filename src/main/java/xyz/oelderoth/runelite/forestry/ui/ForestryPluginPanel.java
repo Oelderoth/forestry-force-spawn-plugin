@@ -83,7 +83,7 @@ public class ForestryPluginPanel extends PluginPanel
 		})
 		.build();
 
-	private final Map<Pair<Long, Integer>, TreeTimerPanel> timerPanelsByHash = new HashMap<>();
+	private final Map<Pair<Integer, Integer>, TreeTimerPanel> timerPanelsByHash = new HashMap<>();
 
 
 	@Inject
@@ -151,7 +151,7 @@ public class ForestryPluginPanel extends PluginPanel
 		var panelOrderDirty = false;
 
 		for (var timer : forceSpawnService.getTreeTimers()) {
-			var key = Pair.of(timer.getGameObject().getHash(), timer.getWorld());
+			var key = Pair.of(timer.getTree().hashCode(), timer.getWorld());
 			unknownKeys.remove(key);
 			if (timerPanelsByHash.containsKey(key)) continue;
 
@@ -202,7 +202,7 @@ public class ForestryPluginPanel extends PluginPanel
 		timerListPanel.removeAll();
 
 		for (var timer : forceSpawnService.getTreeTimers()) {
-			var panel = timerPanelsByHash.get(Pair.of(timer.getGameObject().getHash(), timer.getWorld()));
+			var panel = timerPanelsByHash.get(Pair.of(timer.getTree().hashCode(), timer.getWorld()));
 			if (panel != null)
 				timerListPanel.add(panel, GridBagConstraintsBuilder.verticalRelative());
 		}

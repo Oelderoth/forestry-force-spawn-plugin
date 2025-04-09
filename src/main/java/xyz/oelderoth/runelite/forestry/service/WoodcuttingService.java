@@ -80,6 +80,19 @@ public class WoodcuttingService
 		treeCutDownListeners.remove(handler);
 	}
 
+	public Optional<GameObject> getTreeFromWorldPoint(WorldPoint worldPoint)
+	{
+		return Optional.ofNullable(LocalPoint.fromWorld(client.getTopLevelWorldView(), worldPoint))
+			.map(localPoint -> client.getTopLevelWorldView()
+				.getScene()
+				.getTiles()[worldPoint.getPlane()][localPoint.getSceneX()][localPoint.getSceneY()])
+			.map(Tile::getGameObjects)
+			.flatMap(objects -> Arrays.stream(objects)
+				.filter(it -> TreeType.getTreeType(it)
+					.isPresent())
+				.findFirst());
+	}
+
 	@Subscribe
 	private void onScriptPreFired(ScriptPreFired scriptPreFired)
 	{
@@ -93,7 +106,7 @@ public class WoodcuttingService
 			if (locType == TREE_DESPAWNED_LOC_TYPE)
 			{ // Tree despawned
 				var worldPoint = WorldPoint.fromCoord(locCoord);
-				var eventTreeOpt = getTreeFromCoord(worldPoint);
+				var eventTreeOpt = getTreeFromWorldPoint(worldPoint);
 				eventTreeOpt.ifPresent(this::onTreeCutDown);
 			}
 		}
@@ -146,7 +159,7 @@ public class WoodcuttingService
 	private Optional<GameObject> getFacingTree(Player player)
 	{
 		var facingLocation = getFacingLocation(player);
-		return getTreeFromCoord(facingLocation);
+		return getTreeFromWorldPoint(facingLocation);
 	}
 
 	private WorldPoint getFacingLocation(Player player)
@@ -166,19 +179,6 @@ public class WoodcuttingService
 			default:
 				throw new IllegalStateException("Unexpected value for direction: " + direction);
 		}
-	}
-
-	private Optional<GameObject> getTreeFromCoord(WorldPoint worldPoint)
-	{
-		return Optional.ofNullable(LocalPoint.fromWorld(client.getTopLevelWorldView(), worldPoint))
-			.map(localPoint -> client.getTopLevelWorldView()
-				.getScene()
-				.getTiles()[worldPoint.getPlane()][localPoint.getSceneX()][localPoint.getSceneY()])
-			.map(Tile::getGameObjects)
-			.flatMap(objects -> Arrays.stream(objects)
-				.filter(it -> TreeType.getTreeType(it)
-					.isPresent())
-				.findFirst());
 	}
 
 	private void onStartCutTree(GameObject gameObject)

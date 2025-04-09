@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import net.runelite.client.events.ConfigChanged;
 import xyz.oelderoth.runelite.forestry.ForestryPluginConfig;
+import xyz.oelderoth.runelite.forestry.domain.TreeDefinition;
 import xyz.oelderoth.runelite.forestry.domain.TreeType;
 import xyz.oelderoth.runelite.forestry.domain.TreeTimer;
 import xyz.oelderoth.runelite.forestry.ui.CurrentTreePanel;
@@ -72,7 +73,7 @@ public class ForceSpawnService
 		if ((client.getTickCount() - wcState.getStartTick()) < ForceSpawnService.MIN_TICK_COUNT)
 			return;
 
-		treeTimers.add(new TreeTimer(wcState.getGameObject(), wcState.getTreeType(), wcState.getStartTimeMs(), client.getWorld()));
+		treeTimers.add(new TreeTimer(new TreeDefinition(wcState.getGameObject()), wcState.getTreeType(), wcState.getStartTimeMs(), client.getWorld()));
 	}
 
 	@Subscribe
@@ -110,7 +111,6 @@ public class ForceSpawnService
 	}
 
 	private void removeTimer(GameObject gameObject) {
-		treeTimers.removeIf(timer -> timer.getWorld() == client.getWorld() && timer.getGameObject()
-			.getHash() == gameObject.getHash());
+		treeTimers.removeIf(timer -> timer.getWorld() == client.getWorld() && timer.getTree().matches(gameObject));
 	}
 }

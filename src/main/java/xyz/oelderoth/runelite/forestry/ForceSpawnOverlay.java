@@ -53,11 +53,13 @@ public class ForceSpawnOverlay extends Overlay {
 				if (now - timer.getStartTimeMs() > timer.getTreeType().getDespawnDurationMs())
 				{
 					if (config.highlightCompleteTree())
-						renderer.drawOutline(timer.getGameObject(), config.completedWidth(), config.completedOutline(), config.completedFeather());
+						woodcuttingService.getTreeFromWorldPoint(timer.getTree().getPoint())
+								.ifPresent(obj -> renderer.drawOutline(obj, config.completedWidth(), config.completedOutline(), config.completedFeather()));
 				}
 				else if (config.highlightInProgressTree())
 				{
-					renderer.drawOutline(timer.getGameObject(), config.inProgressWidth(), config.inProgressOutline(), config.inProgressFeather());
+					woodcuttingService.getTreeFromWorldPoint(timer.getTree().getPoint())
+						.ifPresent(obj -> renderer.drawOutline(obj, config.inProgressWidth(), config.inProgressOutline(), config.inProgressFeather()));
 				}
 			});
 
