@@ -72,7 +72,8 @@ public class ForceSpawnService
 
 	@Subscribe
 	private void onConfigChanged(ConfigChanged e) {
-		treeTimers.removeIf(it -> !isTreeTypeEnabled(it.getTreeType()));
+		if (e.getGroup().equals(ForestryPluginConfig.CONFIG_GROUP) && e.getKey().startsWith("track"))
+			treeTimers.removeIf(it -> !isTreeTypeEnabled(it.getTreeType()));
 	}
 
 	@Subscribe

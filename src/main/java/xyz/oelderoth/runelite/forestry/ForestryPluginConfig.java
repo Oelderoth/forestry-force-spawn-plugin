@@ -9,9 +9,18 @@ import net.runelite.client.config.Range;
 import net.runelite.client.config.Units;
 import net.runelite.client.ui.ColorScheme;
 
-@ConfigGroup("forestry_force_spawn")
+@ConfigGroup(ForestryPluginConfig.CONFIG_GROUP)
 public interface ForestryPluginConfig extends Config
 {
+	String CONFIG_GROUP = "forestry_force_spawn";
+
+	enum SORT_TYPE {
+		START_TIME,
+		REMAINING_TIME,
+		WORLD,
+		TREE_TYPE
+	}
+
 	@ConfigSection(
 		name = "In-progress render style",
 		description = "The render style for trees with an in-progress timer.",
@@ -66,6 +75,18 @@ public interface ForestryPluginConfig extends Config
 	{
 		return 5;
 	}
+
+	@ConfigItem(
+		keyName = "sortOrder",
+		name = "Sort timers by",
+		description = "How the side panel should sort active timers",
+		position = 3
+	)
+	default SORT_TYPE sortOrder()
+	{
+		return SORT_TYPE.START_TIME;
+	}
+
 
 	@ConfigItem(
 		keyName = "highlightInProgress",

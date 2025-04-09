@@ -7,6 +7,8 @@ import java.util.concurrent.TimeUnit;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.config.ConfigManager;
+import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.ClientToolbar;
@@ -44,7 +46,8 @@ public class ForestryPlugin extends Plugin
 	private ForestryPluginPanel pluginPanel;
 	private ScheduledFuture<?> panelUpdateFuture;
 
-	public ForestryPlugin() {
+	public ForestryPlugin()
+	{
 		instance = this;
 	}
 
@@ -76,6 +79,16 @@ public class ForestryPlugin extends Plugin
 		pluginPanel = null;
 	}
 
+	@Subscribe
+	protected void onConfigChanged(ConfigChanged e)
+	{
+		if (e.getGroup().equals(ForestryPluginConfig.CONFIG_GROUP) && e.getKey().equals("sortOrder"))
+			pluginPanel.rebuildSortedTimerList();
+	}
+
 	@Provides
-	private ForestryPluginConfig getConfig(ConfigManager configManager) { return configManager.getConfig(ForestryPluginConfig.class); }
+	private ForestryPluginConfig getConfig(ConfigManager configManager)
+	{
+		return configManager.getConfig(ForestryPluginConfig.class);
+	}
 }

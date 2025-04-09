@@ -1,9 +1,12 @@
 package xyz.oelderoth.runelite.forestry.ui;
 
 import java.awt.Cursor;
+import java.time.Instant;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.function.Function;
 import javax.inject.Inject;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -20,6 +23,7 @@ import xyz.oelderoth.runelite.forestry.ForceSpawnService;
 import xyz.oelderoth.runelite.forestry.ForestryPlugin;
 import xyz.oelderoth.runelite.forestry.ForestryPluginConfig;
 import xyz.oelderoth.runelite.forestry.WorldHopService;
+import xyz.oelderoth.runelite.forestry.domain.TreeTimer;
 import xyz.oelderoth.runelite.forestry.ui.builders.border.BorderBuilder;
 import xyz.oelderoth.runelite.forestry.ui.builders.component.ClickFilter;
 import xyz.oelderoth.runelite.forestry.ui.builders.component.LabelBuilder;
@@ -139,6 +143,7 @@ public class ForestryPluginPanel extends PluginPanel
 		timerHint.setVisible(config.showTimerHint() || isNoActiveTimers);
 
 		var unknownKeys = new HashSet<>(timerPanelsByHash.keySet());
+		var panelOrderDirty = false;
 
 		for (var timer : service.getTreeTimers()) {
 			var key = Pair.of(timer.getGameObject().getHash(), timer.getWorld());
@@ -147,24 +152,57 @@ public class ForestryPluginPanel extends PluginPanel
 
 			var panel = new TreeTimerPanel(timer, itemManager, worldHopService, () -> service.getTreeTimers().remove(timer), config);
 			timerPanelsByHash.put(key, panel);
-			timerListPanel.add(panel, GridBagConstraintsBuilder.verticalRelative());
 
-			timerListPanel.revalidate();
-			timerListPanel.repaint();
+			panelOrderDirty = true;
 		}
 
 		for (var removedPanelHash : unknownKeys) {
 			var panel = timerPanelsByHash.getOrDefault(removedPanelHash, null);
 			if (panel == null) continue;
 
-			timerListPanel.remove(panel);
 			timerPanelsByHash.remove(removedPanelHash);
 
-			timerListPanel.revalidate();
-			timerListPanel.repaint();
+			panelOrderDirty = true;
 		}
 
-		timerPanelsByHash.values().forEach(TreeTimerPanel::update);
+		if (panelOrderDirty)
+			rebuildSortedTimerList();
 
+		timerPanelsByHash.values().forEach(TreeTimerPanel::update);
+	}
+
+	public void rebuildSortedTimerList() {
+		Function<TreeTimer, Long> extractor;
+		switch (config.sortOrder()) {
+			case START_TIME:
+				extractor = TreeTimer::getStartTimeMs;
+				break;
+			case REMAINING_TIME:
+				var now = Instant.now().toEpochMilli();
+				extractor = (it) -> it.getTreeType().getDespawnDurationMs() - (now - it.getStartTimeMs());
+				break;
+			case WORLD:
+				extractor = (it) -> (long) it.getWorld();
+				break;
+			case TREE_TYPE:
+				extractor = (it) -> (long) it.getTreeType().ordinal();
+				break;
+			default:
+				return;
+		}
+
+		service.getTreeTimers()
+			.sort(Comparator.comparing(extractor));
+
+		timerListPanel.removeAll();
+
+		for (var timer : service.getTreeTimers()) {
+			var panel = timerPanelsByHash.get(Pair.of(timer.getGameObject().getHash(), timer.getWorld()));
+			if (panel != null)
+				timerListPanel.add(panel, GridBagConstraintsBuilder.verticalRelative());
+		}
+
+		timerListPanel.revalidate();
+		timerListPanel.repaint();
 	}
 }
