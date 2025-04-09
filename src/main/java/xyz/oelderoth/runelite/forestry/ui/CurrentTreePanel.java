@@ -95,17 +95,23 @@ public class CurrentTreePanel extends JPanel
 				.findAny();
 			if (existingTimerOpt.isEmpty())
 			{
-				var ticks = client.getTickCount() - wcStatus.getStartTick();
-				var remaining = ForceSpawnService.MIN_TICK_COUNT - ticks;
-				if (remaining > 0)
-				{
-					hintLabel.setText("Cut for " + remaining + " ticks before hopping");
+				if (wcStatus.isForestryEligible()) {
+					var ticks = client.getTickCount() - wcStatus.getStartTick();
+					var remaining = ForceSpawnService.MIN_TICK_COUNT - ticks;
+
+					if (remaining > 0)
+					{
+						hintLabel.setText("Cut for " + remaining + " ticks before hopping");
+						hintLabel.setForeground(PluginScheme.HINT_COLOR);
+					}
+					else
+					{
+						hintLabel.setText("Hop worlds to start tracking");
+						hintLabel.setForeground(config.inProgressOutline());
+					}
+				} else {
+					hintLabel.setText("Not eligible for forestry events");
 					hintLabel.setForeground(PluginScheme.HINT_COLOR);
-				}
-				else
-				{
-					hintLabel.setText("Ready to hop");
-					hintLabel.setForeground(config.completedOutline());
 				}
 			}
 			else

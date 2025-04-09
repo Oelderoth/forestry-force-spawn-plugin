@@ -1,83 +1,50 @@
 package xyz.oelderoth.runelite.forestry.domain;
 
-import java.lang.reflect.Field;
-import java.util.Arrays;
+import com.google.common.collect.Sets;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
+import net.runelite.api.GameObject;
 import net.runelite.api.ItemID;
-import net.runelite.api.ObjectID;
-import java.lang.reflect.Modifier;
-import net.runelite.api.TileObject;
-import org.apache.commons.lang3.tuple.Pair;
+import static net.runelite.api.ObjectID.*;
 
 @Getter
 @Slf4j
 @AllArgsConstructor
 public enum TreeType
 {
-	Oak(27000, ItemID.OAK_LOGS),
-	Willow(30000, ItemID.WILLOW_LOGS),
-	Teak(30000, ItemID.TEAK_LOGS),
-	Maple(60000, ItemID.MAPLE_LOGS),
-	Mahogany(60000, ItemID.MAHOGANY_LOGS),
-	ArcticPine(114000,ItemID.ARCTIC_PINE_LOGS),
-	Yew(234000, ItemID.YEW_LOGS),
-	Magic(264000, ItemID.MAGIC_LOGS);
+	Oak(27000, ItemID.OAK_LOGS, Sets.newHashSet(OAK_TREE_4540, OAK_TREE_8462, OAK_TREE_8463, OAK_TREE_8464, OAK_TREE_8465, OAK_TREE_8466, OAK_TREE_8467, OAK_TREE_9734, OAK_TREE_10820, OAK_TREE_20806, OAK_TREE_37969, OAK_TREE_37970, OAK_TREE_42395, OAK_TREE_42831, OAK_TREE_51772, OAK_TREE_55913)),
+	Willow(30000, ItemID.WILLOW_LOGS, Sets.newHashSet(WILLOW_TREE_4541, WILLOW_TREE_8481, WILLOW_TREE_8482, WILLOW_TREE_8483, WILLOW_TREE_8484, WILLOW_TREE_8485, WILLOW_TREE_8486, WILLOW_TREE_8487, WILLOW_TREE_8488, WILLOW_TREE_10819, WILLOW_TREE_10829, WILLOW_TREE_10831, WILLOW_TREE_10833)),
+	Teak(30000, ItemID.TEAK_LOGS, Sets.newHashSet(TEAK_TREE_15062, TEAK_TREE_30437, TEAK_TREE_30438, TEAK_TREE_30439, TEAK_TREE_30440, TEAK_TREE_30441, TEAK_TREE_30442, TEAK_TREE_30443, TEAK_TREE_30444, TEAK_TREE_30445, TEAK_TREE_36686, TEAK_TREE_40758)),
+	Maple(60000, ItemID.MAPLE_LOGS, Sets.newHashSet(MAPLE_TREE_4674, MAPLE_TREE_5126, MAPLE_TREE_8435, MAPLE_TREE_8436, MAPLE_TREE_8437, MAPLE_TREE_8438, MAPLE_TREE_8439, MAPLE_TREE_8440, MAPLE_TREE_8441, MAPLE_TREE_8442, MAPLE_TREE_8443, MAPLE_TREE_8444, MAPLE_TREE_10832, MAPLE_TREE_36681, MAPLE_TREE_36682, MAPLE_TREE_40754, MAPLE_TREE_40755)),
+	ArcticPine(114000, ItemID.ARCTIC_PINE_LOGS, Sets.newHashSet(ARCTIC_PINE_TREE)),
+	Mahogany(60000, ItemID.MAHOGANY_LOGS, Sets.newHashSet(MAHOGANY_TREE_30407, MAHOGANY_TREE_30408, MAHOGANY_TREE_30409, MAHOGANY_TREE_30410, MAHOGANY_TREE_30411, MAHOGANY_TREE_30412, MAHOGANY_TREE_30413, MAHOGANY_TREE_30414, MAHOGANY_TREE_30415, MAHOGANY_TREE_30416, MAHOGANY_TREE_30417, MAHOGANY_TREE_36688, MAHOGANY_TREE_40760)),
+	Yew(114000, ItemID.YEW_LOGS, Sets.newHashSet(YEW_TREE_5121, YEW_TREE_8503, YEW_TREE_8504, YEW_TREE_8505, YEW_TREE_8506, YEW_TREE_8507, YEW_TREE_8508, YEW_TREE_8509, YEW_TREE_8510, YEW_TREE_8511, YEW_TREE_8512, YEW_TREE_8513, YEW_TREE_10822, 10823, YEW_TREE_36683, YEW_TREE_40756, YEW_TREE_42391, YEW_TREE_42427)),
+	Magic(234000, ItemID.MAGIC_LOGS, Sets.newHashSet(MAGIC_TREE_5127, MAGIC_TREE_8396, MAGIC_TREE_8397, MAGIC_TREE_8398, MAGIC_TREE_8399, MAGIC_TREE_8400, MAGIC_TREE_8401, MAGIC_TREE_8402, MAGIC_TREE_8403, MAGIC_TREE_8404, MAGIC_TREE_8405, MAGIC_TREE_8406, MAGIC_TREE_8407, MAGIC_TREE_8408, MAGIC_TREE_8409, MAGIC_TREE_10834, MAGIC_TREE_36685));
 
 	private final int despawnDurationMs;
 	private final int itemId;
+	private final Set<Integer> objectIDs;
 
-	private static final Map<Integer, TreeType> treeTypeById;
+	private final static Map<Integer, TreeType> treeTypeById = new HashMap<>();
 
-	public static Optional<TreeType> getTreeTypeOf(TileObject object)
-	{
-		return Optional.ofNullable(object).map(it -> treeTypeById.get(it.getId()));
+	public static Optional<TreeType> getTreeType(int objectId) {
+		return Optional.ofNullable(treeTypeById.get(objectId));
 	}
 
-	private static final Pattern treeRegex = Pattern.compile("([\\w_]+?)_TREE_\\d+");
-	private static Optional<Pair<Integer, TreeType>> getTreeTypeFromField(Field field)
-	{
-		if (!Modifier.isStatic(field.getModifiers()) || !(field.getType() == int.class || field.getType() == Integer.class))
-		{
-			return Optional.empty();
-		}
-		val matcher = treeRegex.matcher(field.getName());
-		if (matcher.matches())
-		{
-			val typeCandidate = matcher.group(1).toLowerCase();
-			return Arrays.stream(TreeType.values()).filter(it -> it.name().toLowerCase().equals(typeCandidate)).findFirst()
-				.map(type -> {
-					try
-					{
-						return Pair.of((int) field.get(null), type);
-					}
-					catch (Exception e)
-					{
-						return null;
-					}
-				});
-		}
-
-		return Optional.empty();
+	public static Optional<TreeType> getTreeType(GameObject object) {
+		return Optional.ofNullable(object).map(GameObject::getId).flatMap(TreeType::getTreeType);
 	}
 
-	static
-	{
-		// TODO: Find a more elegant way to populate this than brute forcing reflection
-		// Retrieve tree types from declared fields in ObjectID class
-		treeTypeById = Arrays.stream(ObjectID.class.getDeclaredFields())
-			.map(TreeType::getTreeTypeFromField)
-			.filter(Optional::isPresent)
-			.map(Optional::get)
-			.collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
-
-		// Manually add known tree types that aren't in ObjectID
-		treeTypeById.put(10823, TreeType.Yew);
+	static {
+		for (var type : TreeType.values()) {
+			for (var id: type.objectIDs) {
+				treeTypeById.put(id, type);
+			}
+		}
 	}
 }

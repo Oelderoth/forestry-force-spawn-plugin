@@ -176,14 +176,14 @@ public class WoodcuttingService
 				.getTiles()[worldPoint.getPlane()][localPoint.getSceneX()][localPoint.getSceneY()])
 			.map(Tile::getGameObjects)
 			.flatMap(objects -> Arrays.stream(objects)
-				.filter(it -> TreeType.getTreeTypeOf(it)
+				.filter(it -> TreeType.getTreeType(it)
 					.isPresent())
 				.findFirst());
 	}
 
 	private void onStartCutTree(GameObject gameObject)
 	{
-		TreeType.getTreeTypeOf(gameObject)
+		TreeType.getTreeType(gameObject)
 			.ifPresent(type -> {
 				woodcuttingState = new WoodcuttingState(gameObject, type, client.getTickCount(), Instant.now()
 					.toEpochMilli());

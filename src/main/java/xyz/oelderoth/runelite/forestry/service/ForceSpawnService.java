@@ -65,7 +65,7 @@ public class ForceSpawnService
 	{
 		var wcState = woodcuttingService.getWoodcuttingState();
 
-		if (wcState == null)
+		if (wcState == null || !wcState.isForestryEligible())
 			return;
 		if (e.getGameState() != GameState.HOPPING && e.getGameState() != GameState.LOGIN_SCREEN)
 			return;
