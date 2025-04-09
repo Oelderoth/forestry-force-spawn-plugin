@@ -14,17 +14,24 @@ public interface ForestryPluginConfig extends Config
 {
 	@ConfigSection(
 		name = "In-progress render style",
-		description = "The render style for trees with an in-progress timer",
+		description = "The render style for trees with an in-progress timer.",
 		position = 10
 	)
 	String inProgressSection = "inprogress";
 
 	@ConfigSection(
 		name = "Completed render style",
-		description = "The render style for trees with a completed timer",
+		description = "The render style for trees with a completed timer.",
 		position = 20
 	)
 	String completedSection = "completed";
+
+	@ConfigSection(
+		name = "Tree types",
+		description = "The types of trees that the plugin should track.",
+		position = 30
+	)
+	String treesSection = "trees";
 
 	@ConfigItem(
 		keyName = "showCurrentTree",
@@ -160,6 +167,102 @@ public interface ForestryPluginConfig extends Config
 	default int completedFeather()
 	{
 		return 0;
+	}
+
+	@ConfigItem(
+		keyName = "trackOakTree",
+		name = "Oak tree",
+		description = "Track whether the plugin tracks oak trees.",
+		position = 30,
+		section = treesSection
+	)
+	default boolean trackOakTree()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "trackWillowTree",
+		name = "Willow tree",
+		description = "Track whether the plugin tracks willow trees.",
+		position = 31,
+		section = treesSection
+	)
+	default boolean trackWillowTree()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "trackTeakTree",
+		name = "Teak tree",
+		description = "Track whether the plugin tracks teak trees.",
+		position = 32,
+		section = treesSection
+	)
+	default boolean trackTeakTree()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "trackMapleTree",
+		name = "Maple tree",
+		description = "Track whether the plugin tracks maple trees.",
+		position = 33,
+		section = treesSection
+	)
+	default boolean trackMapleTree()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "trackMahoganyTree",
+		name = "Mahogany tree",
+		description = "Track whether the plugin tracks mahogany trees.",
+		position = 34,
+		section = treesSection
+	)
+	default boolean trackMahoganyTree()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "trackArcticPineTree",
+		name = "Arctic pine tree",
+		description = "Track whether the plugin tracks arctic pines trees.",
+		position = 35,
+		section = treesSection
+	)
+	default boolean trackArcticPineTree()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "trackYewTree",
+		name = "Yew tree",
+		description = "Track whether the plugin tracks yew trees.",
+		position = 36,
+		section = treesSection
+	)
+	default boolean trackYewTree()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "trackMagicTree",
+		name = "Magic tree",
+		description = "Track whether the plugin tracks magic trees.",
+		position = 37,
+		section = treesSection
+	)
+	default boolean trackMagicTree()
+	{
+		return true;
 	}
 
 }

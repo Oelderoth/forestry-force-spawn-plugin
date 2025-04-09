@@ -26,6 +26,7 @@ public enum TreeType
 	Teak(30000, ItemID.TEAK_LOGS),
 	Maple(60000, ItemID.MAPLE_LOGS),
 	Mahogany(60000, ItemID.MAHOGANY_LOGS),
+	ArcticPine(114000,ItemID.ARCTIC_PINE_LOGS),
 	Yew(234000, ItemID.YEW_LOGS),
 	Magic(264000, ItemID.MAGIC_LOGS);
 

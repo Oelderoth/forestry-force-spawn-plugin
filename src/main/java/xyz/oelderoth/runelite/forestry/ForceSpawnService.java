@@ -28,6 +28,7 @@ import net.runelite.client.eventbus.Subscribe;
 import java.time.Instant;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import net.runelite.client.events.ConfigChanged;
 import xyz.oelderoth.runelite.forestry.domain.PlayerState;
 import xyz.oelderoth.runelite.forestry.domain.TreeType;
 import xyz.oelderoth.runelite.forestry.domain.TreeTimer;
@@ -68,6 +69,11 @@ public class ForceSpawnService
 
 	@Getter
 	private final List<TreeTimer> treeTimers = new ArrayList<>();
+
+	@Subscribe
+	private void onConfigChanged(ConfigChanged e) {
+		treeTimers.removeIf(it -> !isTreeTypeEnabled(it.getTreeType()));
+	}
 
 	@Subscribe
 	private void onGameStateChanged(GameStateChanged e)
@@ -183,7 +189,7 @@ public class ForceSpawnService
 
 	private void onStartCutTree(GameObject gameObject)
 	{
-		val tree = TreeType.getTreeTypeOf(gameObject);
+		val tree = TreeType.getTreeTypeOf(gameObject).filter(this::isTreeTypeEnabled);
 		if (tree.isEmpty())
 		{
 			return;
@@ -198,6 +204,29 @@ public class ForceSpawnService
 	{
 		playerState = PlayerState.NotWoodcutting;
 		woodcuttingState = null;
+	}
+
+	private boolean isTreeTypeEnabled(TreeType treeType) {
+		switch (treeType) {
+			case Oak:
+				return config.trackOakTree();
+			case Willow:
+				return config.trackWillowTree();
+			case Teak:
+				return config.trackTeakTree();
+			case Maple:
+				return config.trackMapleTree();
+			case Mahogany:
+				return config.trackMahoganyTree();
+			case ArcticPine:
+				return config.trackArcticPineTree();
+			case Yew:
+				return config.trackYewTree();
+			case Magic:
+				return config.trackMagicTree();
+			default:
+				return false;
+		}
 	}
 
 	private void removeTimer(GameObject gameObject) {
