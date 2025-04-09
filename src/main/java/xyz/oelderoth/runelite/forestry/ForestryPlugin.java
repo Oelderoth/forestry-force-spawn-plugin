@@ -24,21 +24,11 @@ import xyz.oelderoth.runelite.forestry.ui.ForestryPluginPanel;
 public class ForestryPlugin extends Plugin
 {
 	public static final String PLUGIN_NAME = "Forestry Spawn Helper";
+	@Getter
+	private static ForestryPlugin instance;
 
 	@Inject
 	private ClientToolbar clientToolbar;
-
-	@Inject
-	private ForceSpawnService forceSpawnService;
-
-	@Inject
-	private ForceSpawnOverlay forceSpawnOverlay;
-
-	@Inject
-	private WorldHopService worldHopService;
-
-	@Inject
-	private WoodcuttingService woodcuttingService;
 
 	@Inject
 	private OverlayManager overlayManager;
@@ -46,8 +36,17 @@ public class ForestryPlugin extends Plugin
 	@Inject
 	private ScheduledExecutorService executorService;
 
-	@Getter
-	private static ForestryPlugin instance;
+	@Inject
+	private ForceSpawnOverlay forceSpawnOverlay;
+
+	@Inject
+	private ForceSpawnService forceSpawnService;
+
+	@Inject
+	private WoodcuttingService woodcuttingService;
+
+	@Inject
+	private WorldHopService worldHopService;
 
 	private ForestryPluginPanel pluginPanel;
 	private ScheduledFuture<?> panelUpdateFuture;

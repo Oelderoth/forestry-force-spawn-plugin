@@ -178,7 +178,7 @@ public class WoodcuttingService
 	{
 		TreeType.getTreeTypeOf(gameObject)
 			.ifPresent(type -> {
-				woodcuttingState = new WoodcuttingState(type, gameObject, client.getTickCount(), Instant.now()
+				woodcuttingState = new WoodcuttingState(gameObject, type, client.getTickCount(), Instant.now()
 					.toEpochMilli());
 
 				stateChangeListeners.forEach(handler -> handler.onWoodcuttingStateChanged(woodcuttingState));

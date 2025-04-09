@@ -1,7 +1,6 @@
 package xyz.oelderoth.runelite.forestry;
 
 import javax.inject.Singleton;
-import lombok.val;
 import net.runelite.api.Client;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
@@ -18,19 +17,19 @@ import xyz.oelderoth.runelite.forestry.service.WoodcuttingService;
 public class ForceSpawnOverlay extends Overlay {
 
 	@Inject
-	private ForceSpawnService forceSpawnService;
-
-	@Inject
-	private WoodcuttingService woodcuttingService;
+	private Client client;
 
 	@Inject
 	private ModelOutlineRenderer renderer;
 
 	@Inject
-	private Client client;
+	private ForestryPluginConfig config;
 
 	@Inject
-	private ForestryPluginConfig config;
+	private ForceSpawnService forceSpawnService;
+
+	@Inject
+	private WoodcuttingService woodcuttingService;
 
 	public ForceSpawnOverlay() {
         setPosition(OverlayPosition.DYNAMIC);
@@ -40,7 +39,7 @@ public class ForceSpawnOverlay extends Overlay {
 
 	@Override
     public Dimension render(Graphics2D graphics) {
-		val wcState = woodcuttingService.getWoodcuttingState();
+		var wcState = woodcuttingService.getWoodcuttingState();
 		if (wcState != null && config.highlightInProgressTree()) {
 			if (client.getTickCount() - wcState.getStartTick() > ForceSpawnService.MIN_TICK_COUNT) {
 				renderer.drawOutline(wcState.getGameObject(), config.inProgressWidth(), config.inProgressOutline(), config.inProgressFeather());

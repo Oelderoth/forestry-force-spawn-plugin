@@ -70,7 +70,7 @@ public class ForceSpawnService
 		if ((client.getTickCount() - wcState.getStartTick()) < ForceSpawnService.MIN_TICK_COUNT)
 			return;
 
-		treeTimers.add(new TreeTimer(client.getWorld(), wcState.getGameObject(), wcState.getTreeType(), wcState.getStartTimeMs()));
+		treeTimers.add(new TreeTimer(wcState.getGameObject(), wcState.getTreeType(), wcState.getStartTimeMs(), client.getWorld()));
 	}
 
 	@Subscribe

@@ -6,8 +6,8 @@ import net.runelite.api.GameObject;
 @Data
 public class TreeTimer
 {
-	private final int world;
 	private final GameObject gameObject;
 	private final TreeType treeType;
 	private final long startTimeMs;
+	private final int world;
 }

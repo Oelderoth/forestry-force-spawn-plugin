@@ -34,8 +34,13 @@ public enum TreeType
 	private final int itemId;
 
 	private static final Map<Integer, TreeType> treeTypeById;
-	private static final Pattern treeRegex = Pattern.compile("([\\w_]+?)_TREE_\\d+");
 
+	public static Optional<TreeType> getTreeTypeOf(TileObject object)
+	{
+		return Optional.ofNullable(object).map(it -> treeTypeById.get(it.getId()));
+	}
+
+	private static final Pattern treeRegex = Pattern.compile("([\\w_]+?)_TREE_\\d+");
 	private static Optional<Pair<Integer, TreeType>> getTreeTypeFromField(Field field)
 	{
 		if (!Modifier.isStatic(field.getModifiers()) || !(field.getType() == int.class || field.getType() == Integer.class))
@@ -60,11 +65,6 @@ public enum TreeType
 		}
 
 		return Optional.empty();
-	}
-
-	public static Optional<TreeType> getTreeTypeOf(TileObject object)
-	{
-		return Optional.ofNullable(object).map(it -> treeTypeById.get(it.getId()));
 	}
 
 	static
