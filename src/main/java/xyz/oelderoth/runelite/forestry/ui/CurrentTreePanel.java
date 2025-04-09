@@ -13,7 +13,7 @@ import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.FontManager;
 import xyz.oelderoth.runelite.forestry.service.ForceSpawnService;
 import xyz.oelderoth.runelite.forestry.ForestryPluginConfig;
-import xyz.oelderoth.runelite.forestry.domain.PlayerState;
+import xyz.oelderoth.runelite.forestry.service.WoodcuttingService;
 import xyz.oelderoth.runelite.forestry.ui.builders.border.BorderBuilder;
 import xyz.oelderoth.runelite.forestry.ui.builders.component.LabelBuilder;
 import xyz.oelderoth.runelite.forestry.ui.builders.panel.BorderPanelBuilder;
@@ -24,7 +24,9 @@ import xyz.oelderoth.runelite.forestry.ui.builders.panel.GridBagPanelBuilder;
 public class CurrentTreePanel extends JPanel
 {
 	@Inject
-	private ForceSpawnService service;
+	private ForceSpawnService forceSpawnService;
+
+	private final WoodcuttingService woodcuttingService;
 
 	@Inject
 	private Client client;
@@ -46,13 +48,16 @@ public class CurrentTreePanel extends JPanel
 		.build();
 
 	private final JLabel icon = new LabelBuilder()
-			.text("\u00a0")
-			.bounds(0, 0, Constants.ITEM_SPRITE_WIDTH, Constants.ITEM_SPRITE_HEIGHT)
-			.preferredSize(Constants.ITEM_SPRITE_WIDTH, Constants.ITEM_SPRITE_HEIGHT)
-			.build();
+		.text("\u00a0")
+		.bounds(0, 0, Constants.ITEM_SPRITE_WIDTH, Constants.ITEM_SPRITE_HEIGHT)
+		.preferredSize(Constants.ITEM_SPRITE_WIDTH, Constants.ITEM_SPRITE_HEIGHT)
+		.build();
 
-	public CurrentTreePanel()
+	@Inject
+	public CurrentTreePanel(WoodcuttingService woodcuttingService)
 	{
+		this.woodcuttingService = woodcuttingService;
+
 		var infoPanel = new GridBagPanelBuilder()
 			.constraints(GridBagConstraintsBuilder.verticalRelative(2))
 			.add(titleLabel)
@@ -67,47 +72,58 @@ public class CurrentTreePanel extends JPanel
 			.build();
 
 		update();
+
+		woodcuttingService.registerStateListener(s -> update());
 	}
 
 	public void update()
 	{
-		if (service != null && service.getPlayerState() == PlayerState.Woodcutting)
+		var wcStatus = woodcuttingService.getWoodcuttingState();
+		if (wcStatus != null)
 		{
-			var wcStatus = service.getWoodcuttingState();
-			if (wcStatus != null)
-			{
-				itemManager.getImage(wcStatus.getTreeType().getItemId()).addTo(icon);
-				titleLabel.setText(wcStatus.getTreeType() + " Tree");
+			itemManager.getImage(wcStatus.getTreeType()
+					.getItemId())
+				.addTo(icon);
+			titleLabel.setText(wcStatus.getTreeType() + " Tree");
 
-				var existingTimerOpt = service.getTreeTimers().stream().filter(it -> it.getGameObject().getHash() == wcStatus.getGameObject().getHash() && it.getWorld() == client.getWorld()).findAny();
-				if (existingTimerOpt.isEmpty()) {
-					var ticks = client.getTickCount() - wcStatus.getStartTick();
-					var remaining = ForceSpawnService.MIN_TICK_COUNT - ticks;
-					if (remaining > 0)
-					{
-						hintLabel.setText("Cut for " + remaining + " ticks before hopping");
-						hintLabel.setForeground(PluginScheme.HINT_COLOR);
-					}
-					else
-					{
-						hintLabel.setText("Ready to hop");
-						hintLabel.setForeground(config.completedOutline());
-					}
-				} else {
-					var timer = existingTimerOpt.get();
-					var elapsed = Instant.now().toEpochMilli() - timer.getStartTimeMs();
-					var remaining = timer.getTreeType().getDespawnDurationMs() - elapsed;
-					if (remaining > 0)
-					{
-						var duration = Duration.of(remaining, ChronoUnit.MILLIS);
-						hintLabel.setText(String.format("Ready to harvest in %02d:%02d", duration.toMinutesPart(), duration.toSecondsPart()));
-						hintLabel.setForeground(config.inProgressOutline());
-					}
-					else
-					{
-						hintLabel.setText("Ready to harvest");
-						hintLabel.setForeground(config.completedOutline());
-					}
+			var existingTimerOpt = forceSpawnService.getTreeTimers()
+				.stream()
+				.filter(it -> it.getGameObject()
+					.getHash() == wcStatus.getGameObject()
+					.getHash() && it.getWorld() == client.getWorld())
+				.findAny();
+			if (existingTimerOpt.isEmpty())
+			{
+				var ticks = client.getTickCount() - wcStatus.getStartTick();
+				var remaining = ForceSpawnService.MIN_TICK_COUNT - ticks;
+				if (remaining > 0)
+				{
+					hintLabel.setText("Cut for " + remaining + " ticks before hopping");
+					hintLabel.setForeground(PluginScheme.HINT_COLOR);
+				}
+				else
+				{
+					hintLabel.setText("Ready to hop");
+					hintLabel.setForeground(config.completedOutline());
+				}
+			}
+			else
+			{
+				var timer = existingTimerOpt.get();
+				var elapsed = Instant.now()
+					.toEpochMilli() - timer.getStartTimeMs();
+				var remaining = timer.getTreeType()
+					.getDespawnDurationMs() - elapsed;
+				if (remaining > 0)
+				{
+					var duration = Duration.of(remaining, ChronoUnit.MILLIS);
+					hintLabel.setText(String.format("Ready to harvest in %02d:%02d", duration.toMinutesPart(), duration.toSecondsPart()));
+					hintLabel.setForeground(config.inProgressOutline());
+				}
+				else
+				{
+					hintLabel.setText("Ready to harvest");
+					hintLabel.setForeground(config.completedOutline());
 				}
 			}
 		}

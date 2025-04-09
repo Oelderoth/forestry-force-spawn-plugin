@@ -11,14 +11,17 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.time.Instant;
 import javax.inject.Inject;
-import xyz.oelderoth.runelite.forestry.domain.PlayerState;
 import xyz.oelderoth.runelite.forestry.service.ForceSpawnService;
+import xyz.oelderoth.runelite.forestry.service.WoodcuttingService;
 
 @Singleton
 public class ForceSpawnOverlay extends Overlay {
 
 	@Inject
 	private ForceSpawnService forceSpawnService;
+
+	@Inject
+	private WoodcuttingService woodcuttingService;
 
 	@Inject
 	private ModelOutlineRenderer renderer;
@@ -37,9 +40,8 @@ public class ForceSpawnOverlay extends Overlay {
 
 	@Override
     public Dimension render(Graphics2D graphics) {
-		val state = forceSpawnService.getPlayerState();
-		val wcState = forceSpawnService.getWoodcuttingState();
-		if (state == PlayerState.Woodcutting && wcState != null && config.highlightInProgressTree()) {
+		val wcState = woodcuttingService.getWoodcuttingState();
+		if (wcState != null && config.highlightInProgressTree()) {
 			if (client.getTickCount() - wcState.getStartTick() > ForceSpawnService.MIN_TICK_COUNT) {
 				renderer.drawOutline(wcState.getGameObject(), config.inProgressWidth(), config.inProgressOutline(), config.inProgressFeather());
 			}

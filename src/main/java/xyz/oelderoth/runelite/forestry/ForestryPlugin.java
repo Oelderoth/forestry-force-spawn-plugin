@@ -15,6 +15,7 @@ import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.overlay.OverlayManager;
 import javax.inject.Inject;
 import xyz.oelderoth.runelite.forestry.service.ForceSpawnService;
+import xyz.oelderoth.runelite.forestry.service.WoodcuttingService;
 import xyz.oelderoth.runelite.forestry.service.WorldHopService;
 import xyz.oelderoth.runelite.forestry.ui.ForestryPluginPanel;
 
@@ -35,6 +36,9 @@ public class ForestryPlugin extends Plugin
 
 	@Inject
 	private WorldHopService worldHopService;
+
+	@Inject
+	private WoodcuttingService woodcuttingService;
 
 	@Inject
 	private OverlayManager overlayManager;
@@ -61,6 +65,7 @@ public class ForestryPlugin extends Plugin
 
 		forceSpawnService.enable();
 		worldHopService.enable();
+		woodcuttingService.enable();
 		overlayManager.add(forceSpawnOverlay);
 		clientToolbar.addNavigation(pluginPanel.getNavigationButton());
 		panelUpdateFuture = executorService.scheduleAtFixedRate(pluginPanel::update, 200, 200, TimeUnit.MILLISECONDS);
@@ -71,6 +76,7 @@ public class ForestryPlugin extends Plugin
 	{
 		forceSpawnService.disable();
 		worldHopService.disable();
+		woodcuttingService.disable();
 		overlayManager.remove(forceSpawnOverlay);
 		clientToolbar.removeNavigation(pluginPanel.getNavigationButton());
 		if (panelUpdateFuture != null)
