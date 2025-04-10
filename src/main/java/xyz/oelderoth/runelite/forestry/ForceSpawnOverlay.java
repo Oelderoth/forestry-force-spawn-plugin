@@ -2,8 +2,10 @@ package xyz.oelderoth.runelite.forestry;
 
 import com.google.common.base.MoreObjects;
 import java.awt.BasicStroke;
+import java.awt.Color;
 import javax.inject.Singleton;
 import net.runelite.api.Client;
+import net.runelite.api.GameObject;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
@@ -51,7 +53,17 @@ public class ForceSpawnOverlay extends Overlay
 		{
 			if (client.getTickCount() - wcState.getStartTick() > ForceSpawnService.MIN_TICK_COUNT)
 			{
-				renderer.drawOutline(wcState.getGameObject(), config.inProgressWidth(), config.inProgressBorderColor(), config.inProgressFeather());
+				renderHighlight(graphics,
+					wcState.getGameObject(),
+					config.inProgressBorderColor(),
+					config.inProgressFillColor(),
+					config.inProgressWidth(),
+					config.completedFeather(),
+					config.drawOutlineInProgressTree(),
+					config.drawHullInProgressTree(),
+					config.drawClickboxInProgressTree(),
+					config.drawTileInProgressTree()
+				);
 			}
 		}
 
@@ -73,38 +85,47 @@ public class ForceSpawnOverlay extends Overlay
 				var drawTile = completed ? config.drawTileCompleteTree() : config.drawTileInProgressTree();
 
 				woodcuttingService.getTreeObject(timer.getTree())
-					.ifPresent(obj -> {
-						if (drawOutline) {
-							renderer.drawOutline(obj, width, borderColor, feather);
-						}
-						if (drawHull)
-						{
-							var hull = obj.getConvexHull();
-							if (hull != null) {
-								// Default to a=50 to match default ObjectIndicators
-								var color = MoreObjects.firstNonNull(fillColor, ColorUtil.colorWithAlpha(borderColor, 50));
-								OverlayUtil.renderPolygon(graphics, hull, borderColor, color, new BasicStroke(width));
-							}
-						}
-						if (drawClickbox) {
-							var clickbox = obj.getClickbox();
-							if (clickbox != null) {
-								// Default to using a/12 to match default ObjectIndicators
-								var color = MoreObjects.firstNonNull(fillColor, ColorUtil.colorWithAlpha(borderColor, borderColor.getAlpha()/12));
-								OverlayUtil.renderPolygon(graphics, clickbox, borderColor, color, new BasicStroke(width));
-							}
-						}
-						if (drawTile) {
-							var tile = obj.getCanvasTilePoly();
-							if (tile != null) {
-								// Default to using a/12 to match default ObjectIndicators
-								var color = MoreObjects.firstNonNull(fillColor, ColorUtil.colorWithAlpha(borderColor, borderColor.getAlpha()/12));
-								OverlayUtil.renderPolygon(graphics, tile, borderColor, color, new BasicStroke(width));
-							}
-						}
-					});
+					.ifPresent(obj -> renderHighlight(graphics, obj, borderColor, fillColor, width, feather, drawOutline, drawHull, drawClickbox, drawTile));
 			});
 
 		return null;
+	}
+
+	private void renderHighlight(Graphics2D graphics, GameObject obj, Color borderColor, Color fillColor, int width, int feather, boolean drawOutline, boolean drawHull, boolean drawClickbox, boolean drawTile)
+	{
+		if (drawOutline)
+		{
+			renderer.drawOutline(obj, width, borderColor, feather);
+		}
+		if (drawHull)
+		{
+			var hull = obj.getConvexHull();
+			if (hull != null)
+			{
+				// Default to a=50 to match default ObjectIndicators
+				var color = MoreObjects.firstNonNull(fillColor, new Color(0, 0, 0, 50));
+				OverlayUtil.renderPolygon(graphics, hull, borderColor, color, new BasicStroke(width));
+			}
+		}
+		if (drawClickbox)
+		{
+			var clickbox = obj.getClickbox();
+			if (clickbox != null)
+			{
+				// Default to using a/12 to match default ObjectIndicators
+				var color = MoreObjects.firstNonNull(fillColor, ColorUtil.colorWithAlpha(borderColor, borderColor.getAlpha() / 12));
+				OverlayUtil.renderPolygon(graphics, clickbox, borderColor, color, new BasicStroke(width));
+			}
+		}
+		if (drawTile)
+		{
+			var tile = obj.getCanvasTilePoly();
+			if (tile != null)
+			{
+				// Default to using a/12 to match default ObjectIndicators
+				var color = MoreObjects.firstNonNull(fillColor, ColorUtil.colorWithAlpha(borderColor, borderColor.getAlpha() / 12));
+				OverlayUtil.renderPolygon(graphics, tile, borderColor, color, new BasicStroke(width));
+			}
+		}
 	}
 }
