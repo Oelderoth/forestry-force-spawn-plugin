@@ -74,7 +74,7 @@ public interface ForestryPluginConfig extends Config
 	@Units(Units.MINUTES)
 	default int removeTimersAfter()
 	{
-		return 5;
+		return 10;
 	}
 
 	@ConfigItem(
