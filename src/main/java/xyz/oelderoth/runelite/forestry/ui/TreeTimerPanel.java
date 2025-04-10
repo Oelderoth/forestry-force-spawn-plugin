@@ -44,7 +44,7 @@ public class TreeTimerPanel extends JPanel
 		progressBar.setValue(0);
 		progressBar.setMaximumValue(timer.getTreeType()
 			.getDespawnDurationMs());
-		progressBar.setForeground(config.inProgressColor());
+		progressBar.setForeground(config.inProgressBorderColor());
 
 		var icon = new LabelBuilder()
 			.bounds(0, 0, Constants.ITEM_SPRITE_WIDTH, Constants.ITEM_SPRITE_HEIGHT)
@@ -124,11 +124,11 @@ public class TreeTimerPanel extends JPanel
 		if (remaining <= 0)
 		{
 			estimateLabel.setText("Ready to harvest");
-			estimateLabel.setForeground(config.completedColor());
+			estimateLabel.setForeground(config.completedBorderColor());
 
 			progressBar.setValue(timer.getTreeType()
 				.getDespawnDurationMs());
-			progressBar.setForeground(config.completedColor());
+			progressBar.setForeground(config.completedBorderColor());
 		}
 		else
 		{
@@ -137,7 +137,7 @@ public class TreeTimerPanel extends JPanel
 			estimateLabel.setForeground(PluginScheme.HINT_COLOR);
 
 			progressBar.setValue((int) elapsed);
-			progressBar.setForeground(config.inProgressColor());
+			progressBar.setForeground(config.inProgressBorderColor());
 		}
 	}
 }

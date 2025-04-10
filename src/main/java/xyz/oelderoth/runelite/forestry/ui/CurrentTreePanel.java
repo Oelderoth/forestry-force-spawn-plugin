@@ -105,7 +105,7 @@ public class CurrentTreePanel extends JPanel
 					else
 					{
 						hintLabel.setText("Hop worlds to start tracking");
-						hintLabel.setForeground(config.inProgressColor());
+						hintLabel.setForeground(config.inProgressBorderColor());
 					}
 				} else {
 					hintLabel.setText("Not eligible for forestry events");
@@ -123,12 +123,12 @@ public class CurrentTreePanel extends JPanel
 				{
 					var duration = Duration.of(remaining, ChronoUnit.MILLIS);
 					hintLabel.setText(String.format("Ready to harvest in %02d:%02d", duration.toMinutesPart(), duration.toSecondsPart()));
-					hintLabel.setForeground(config.inProgressColor());
+					hintLabel.setForeground(config.inProgressBorderColor());
 				}
 				else
 				{
 					hintLabel.setText("Ready to harvest");
-					hintLabel.setForeground(config.completedColor());
+					hintLabel.setForeground(config.completedBorderColor());
 				}
 			}
 		}

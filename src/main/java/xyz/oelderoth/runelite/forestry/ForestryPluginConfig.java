@@ -1,6 +1,7 @@
 package xyz.oelderoth.runelite.forestry;
 
 import java.awt.Color;
+import net.runelite.client.config.Alpha;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
@@ -136,23 +137,34 @@ public interface ForestryPluginConfig extends Config
 		return false;
 	}
 
+	@Alpha
 	@ConfigItem(
 		keyName = "inProgressColor",
-		name = "Highlight color",
+		name = "Border color",
 		description = "Color of the border for trees with an in-progress timer.",
 		position = 14,
 		section = inProgressSection
 	)
-	default Color inProgressColor()
+	default Color inProgressBorderColor()
 	{
 		return ColorScheme.PROGRESS_INPROGRESS_COLOR;
 	}
+
+	@Alpha
+	@ConfigItem(
+		keyName = "inProgressFill",
+		name = "Fill color",
+		description = "Color of the fill for trees with an in-progress timer.",
+		position = 15,
+		section = inProgressSection
+	)
+	Color inProgressFillColor();
 
 	@ConfigItem(
 		keyName = "inProgressWidth",
 		name = "Border width",
 		description = "Width of the border for trees with an in-progress timer.",
-		position = 15,
+		position = 16,
 		section = inProgressSection
 	)
 	default int inProgressWidth()
@@ -164,7 +176,7 @@ public interface ForestryPluginConfig extends Config
 		keyName = "inProgressFeather",
 		name = "Outline feather",
 		description = "Specify between 0-4 how much of the model outline should be faded for trees with an in-progress timer.",
-		position = 16,
+		position = 17,
 		section = inProgressSection
 	)
 	@Range(
@@ -224,24 +236,34 @@ public interface ForestryPluginConfig extends Config
 		return false;
 	}
 
-
+	@Alpha
 	@ConfigItem(
 		keyName = "completedColor",
-		name = "Highlight color",
+		name = "Border color",
 		description = "Color of the highlight for trees with a completed timer.",
 		position = 24,
 		section = completedSection
 	)
-	default Color completedColor()
+	default Color completedBorderColor()
 	{
 		return ColorScheme.PROGRESS_COMPLETE_COLOR;
 	}
+
+	@Alpha
+	@ConfigItem(
+		keyName = "completedFill",
+		name = "Fill color",
+		description = "Color of the highlight for trees with a completed timer.",
+		position = 25,
+		section = completedSection
+	)
+	Color completedFillColor();
 
 	@ConfigItem(
 		keyName = "completedWidth",
 		name = "Border width",
 		description = "Width of the border for trees with a completed timer",
-		position = 25,
+		position = 26,
 		section = completedSection
 	)
 	default int completedWidth()
@@ -253,7 +275,7 @@ public interface ForestryPluginConfig extends Config
 		keyName = "completedFeather",
 		name = "Outline feather",
 		description = "Specify between 0-4 how much of the model outline should be faded for trees with a completed timer",
-		position = 26,
+		position = 27,
 		section = completedSection
 	)
 	@Range(
