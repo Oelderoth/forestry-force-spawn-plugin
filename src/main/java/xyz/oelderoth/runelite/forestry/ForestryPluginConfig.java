@@ -205,7 +205,7 @@ public interface ForestryPluginConfig extends Config
 		name = "Highlight hull",
 		description = "Highlight the hull for trees that have a completed timer..",
 		position = 21,
-		section = inProgressSection
+		section = completedSection
 	)
 	default boolean drawHullCompleteTree()
 	{
@@ -217,7 +217,7 @@ public interface ForestryPluginConfig extends Config
 		name = "Highlight clickbox",
 		description = "Highlight the clickbox for trees that have a completed timer.",
 		position = 22,
-		section = inProgressSection
+		section = completedSection
 	)
 	default boolean drawClickboxCompleteTree()
 	{
@@ -229,7 +229,7 @@ public interface ForestryPluginConfig extends Config
 		name = "Highlight tile",
 		description = "Highlight the tile for trees that have a completed timer.",
 		position = 23,
-		section = inProgressSection
+		section = completedSection
 	)
 	default boolean drawTileCompleteTree()
 	{
