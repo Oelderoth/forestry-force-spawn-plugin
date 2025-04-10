@@ -89,25 +89,61 @@ public interface ForestryPluginConfig extends Config
 
 
 	@ConfigItem(
-		keyName = "highlightInProgress",
-		name = "Highlight in-progress trees",
-		description = "Draw a highlight around trees that have an in-progress timer.",
+		keyName = "outlineInProgress",
+		name = "Highlight outline",
+		description = "Highlight the outline around trees that have an in-progress timer.",
 		position = 10,
 		section = inProgressSection
 	)
-	default boolean highlightInProgressTree()
+	default boolean drawOutlineInProgressTree()
 	{
 		return true;
 	}
 
 	@ConfigItem(
-		keyName = "inProgressOutline",
-		name = "Highlight color",
-		description = "Color of the border for trees with an in-progress timer.",
+		keyName = "hullInProgress",
+		name = "Highlight hull",
+		description = "Highlight the hull for trees that have an in-progress timer.",
 		position = 11,
 		section = inProgressSection
 	)
-	default Color inProgressOutline()
+	default boolean drawHullInProgressTree()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "clickboxInProgress",
+		name = "Highlight clickbox",
+		description = "Highlight the clickbox for trees that have an in-progress timer.",
+		position = 12,
+		section = inProgressSection
+	)
+	default boolean drawClickboxInProgressTree()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "tileInProgress",
+		name = "Highlight tile",
+		description = "Highlight the tile for trees that have an in-progress timer.",
+		position = 13,
+		section = inProgressSection
+	)
+	default boolean drawTileInProgressTree()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "inProgressColor",
+		name = "Highlight color",
+		description = "Color of the border for trees with an in-progress timer.",
+		position = 14,
+		section = inProgressSection
+	)
+	default Color inProgressColor()
 	{
 		return ColorScheme.PROGRESS_INPROGRESS_COLOR;
 	}
@@ -116,7 +152,7 @@ public interface ForestryPluginConfig extends Config
 		keyName = "inProgressWidth",
 		name = "Border width",
 		description = "Width of the border for trees with an in-progress timer.",
-		position = 12,
+		position = 15,
 		section = inProgressSection
 	)
 	default int inProgressWidth()
@@ -128,7 +164,7 @@ public interface ForestryPluginConfig extends Config
 		keyName = "inProgressFeather",
 		name = "Outline feather",
 		description = "Specify between 0-4 how much of the model outline should be faded for trees with an in-progress timer.",
-		position = 13,
+		position = 16,
 		section = inProgressSection
 	)
 	@Range(
@@ -140,25 +176,63 @@ public interface ForestryPluginConfig extends Config
 	}
 
 	@ConfigItem(
-		keyName = "highlightComplete",
+		keyName = "outlineComplete",
 		name = "Highlight completed trees",
-		description = "Draw a highlight around trees that have a completed timer.",
+		description = "Highlight the outline around trees that have a completed timer.",
 		position = 20,
 		section = completedSection
 	)
-	default boolean highlightCompleteTree()
+	default boolean drawOutlineCompleteTree()
 	{
 		return true;
 	}
 
+
 	@ConfigItem(
-		keyName = "completedOutline",
-		name = "Highlight color",
-		description = "Color of the border for trees with a completed timer.",
+		keyName = "hullComplete",
+		name = "Highlight hull",
+		description = "Highlight the hull for trees that have a completed timer..",
 		position = 21,
+		section = inProgressSection
+	)
+	default boolean drawHullCompleteTree()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "clickboxComplete",
+		name = "Highlight clickbox",
+		description = "Highlight the clickbox for trees that have a completed timer.",
+		position = 22,
+		section = inProgressSection
+	)
+	default boolean drawClickboxCompleteTree()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "tileComplete",
+		name = "Highlight tile",
+		description = "Highlight the tile for trees that have a completed timer.",
+		position = 23,
+		section = inProgressSection
+	)
+	default boolean drawTileCompleteTree()
+	{
+		return false;
+	}
+
+
+	@ConfigItem(
+		keyName = "completedColor",
+		name = "Highlight color",
+		description = "Color of the highlight for trees with a completed timer.",
+		position = 24,
 		section = completedSection
 	)
-	default Color completedOutline()
+	default Color completedColor()
 	{
 		return ColorScheme.PROGRESS_COMPLETE_COLOR;
 	}
@@ -167,7 +241,7 @@ public interface ForestryPluginConfig extends Config
 		keyName = "completedWidth",
 		name = "Border width",
 		description = "Width of the border for trees with a completed timer",
-		position = 22,
+		position = 25,
 		section = completedSection
 	)
 	default int completedWidth()
@@ -179,7 +253,7 @@ public interface ForestryPluginConfig extends Config
 		keyName = "completedFeather",
 		name = "Outline feather",
 		description = "Specify between 0-4 how much of the model outline should be faded for trees with a completed timer",
-		position = 23,
+		position = 26,
 		section = completedSection
 	)
 	@Range(
