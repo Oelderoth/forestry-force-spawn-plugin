@@ -5,11 +5,12 @@ import net.runelite.api.GameObject;
 import net.runelite.api.coords.WorldPoint;
 
 @Data
-public class TreeDefinition {
+public class ObjectPosition
+{
 	private final int objectID;
 	private final WorldPoint point;
 
-	public TreeDefinition(GameObject object) {
+	public ObjectPosition(GameObject object) {
 		objectID = object.getId();
 		point = object.getWorldLocation();
 	}

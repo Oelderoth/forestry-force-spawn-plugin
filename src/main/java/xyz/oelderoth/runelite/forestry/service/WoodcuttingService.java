@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -11,9 +12,11 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.AnimationID;
 import net.runelite.api.Client;
 import net.runelite.api.GameObject;
+import net.runelite.api.GameState;
 import net.runelite.api.Player;
 import net.runelite.api.ScriptID;
 import net.runelite.api.Tile;
@@ -21,15 +24,19 @@ import net.runelite.api.TileObject;
 import net.runelite.api.coords.Angle;
 import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
+import net.runelite.api.events.GameObjectDespawned;
+import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.ScriptPreFired;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import xyz.oelderoth.runelite.forestry.domain.TreeCutDownListener;
+import xyz.oelderoth.runelite.forestry.domain.ObjectPosition;
 import xyz.oelderoth.runelite.forestry.domain.TreeType;
 import xyz.oelderoth.runelite.forestry.domain.WoodcuttingState;
 import xyz.oelderoth.runelite.forestry.domain.WoodcuttingStateListener;
 
+@Slf4j
 @SuppressWarnings("UnusedReturnValue")
 @Singleton
 public class WoodcuttingService
@@ -49,6 +56,7 @@ public class WoodcuttingService
 
 	private final List<WoodcuttingStateListener> stateChangeListeners = new ArrayList<>();
 	private final List<TreeCutDownListener> treeCutDownListeners = new ArrayList<>();
+	private final HashMap<Integer, GameObject> objectCache = new HashMap<>();
 
 	public void enable()
 	{
@@ -80,17 +88,13 @@ public class WoodcuttingService
 		treeCutDownListeners.remove(handler);
 	}
 
-	public Optional<GameObject> getTreeFromWorldPoint(WorldPoint worldPoint)
-	{
-		return Optional.ofNullable(LocalPoint.fromWorld(client.getTopLevelWorldView(), worldPoint))
-			.map(localPoint -> client.getTopLevelWorldView()
-				.getScene()
-				.getTiles()[worldPoint.getPlane()][localPoint.getSceneX()][localPoint.getSceneY()])
-			.map(Tile::getGameObjects)
-			.flatMap(objects -> Arrays.stream(objects)
-				.filter(it -> TreeType.getTreeType(it)
-					.isPresent())
-				.findFirst());
+	public Optional<GameObject> getTreeObject(ObjectPosition tree) {
+		var hash = tree.hashCode();
+		if (objectCache.containsKey(hash)) return Optional.of(objectCache.get(hash));
+
+		var objOpt = getTreeFromWorldPoint(tree.getPoint());
+		objOpt.ifPresent(obj -> objectCache.put(hash, obj));
+		return objOpt;
 	}
 
 	@Subscribe
@@ -145,6 +149,20 @@ public class WoodcuttingService
 		}
 	}
 
+	@Subscribe
+	private void onGameStateChanged(GameStateChanged e) {
+		if (e.getGameState() != GameState.LOGGED_IN)
+			objectCache.clear();
+	}
+
+	@Subscribe
+	private void onGameObjectDespawned(GameObjectDespawned e) {
+		if (TreeType.isTree(e.getGameObject())) {
+			var p = new ObjectPosition(e.getGameObject());
+			objectCache.remove(p.hashCode());
+		}
+	}
+
 	private void onStopCutTree(GameObject gameObject)
 	{
 		woodcuttingState = null;
@@ -155,6 +173,20 @@ public class WoodcuttingService
 	{
 		treeCutDownListeners.forEach(handler -> handler.onTreeCutDown(gameObject));
 	}
+
+	private Optional<GameObject> getTreeFromWorldPoint(WorldPoint worldPoint)
+	{
+		return Optional.ofNullable(LocalPoint.fromWorld(client.getTopLevelWorldView(), worldPoint))
+			.map(localPoint -> client.getTopLevelWorldView()
+				.getScene()
+				.getTiles()[worldPoint.getPlane()][localPoint.getSceneX()][localPoint.getSceneY()])
+			.map(Tile::getGameObjects)
+			.flatMap(objects -> Arrays.stream(objects)
+				.filter(it -> TreeType.getTreeType(it)
+					.isPresent())
+				.findFirst());
+	}
+
 
 	private Optional<GameObject> getFacingTree(Player player)
 	{

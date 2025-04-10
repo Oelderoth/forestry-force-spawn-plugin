@@ -40,6 +40,10 @@ public enum TreeType
 		return Optional.ofNullable(object).map(GameObject::getId).flatMap(TreeType::getTreeType);
 	}
 
+	public static boolean isTree(GameObject object) {
+		return treeTypeById.containsKey(object.getId());
+	}
+
 	static {
 		for (var type : TreeType.values()) {
 			for (var id: type.objectIDs) {

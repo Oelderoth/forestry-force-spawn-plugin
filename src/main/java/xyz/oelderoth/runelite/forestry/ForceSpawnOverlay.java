@@ -14,7 +14,8 @@ import xyz.oelderoth.runelite.forestry.service.ForceSpawnService;
 import xyz.oelderoth.runelite.forestry.service.WoodcuttingService;
 
 @Singleton
-public class ForceSpawnOverlay extends Overlay {
+public class ForceSpawnOverlay extends Overlay
+{
 
 	@Inject
 	private Client client;
@@ -31,38 +32,43 @@ public class ForceSpawnOverlay extends Overlay {
 	@Inject
 	private WoodcuttingService woodcuttingService;
 
-	public ForceSpawnOverlay() {
-        setPosition(OverlayPosition.DYNAMIC);
-        setLayer(OverlayLayer.ABOVE_SCENE);
-        setPriority(PRIORITY_HIGH);
-    }
+	public ForceSpawnOverlay()
+	{
+		setPosition(OverlayPosition.DYNAMIC);
+		setLayer(OverlayLayer.ABOVE_SCENE);
+		setPriority(PRIORITY_HIGH);
+	}
 
 	@Override
-    public Dimension render(Graphics2D graphics) {
+	public Dimension render(Graphics2D graphics)
+	{
 		var wcState = woodcuttingService.getWoodcuttingState();
-		if (wcState != null && config.highlightInProgressTree()) {
-			if (client.getTickCount() - wcState.getStartTick() > ForceSpawnService.MIN_TICK_COUNT) {
+		if (wcState != null && config.drawOutlineInProgressTree())
+		{
+			if (client.getTickCount() - wcState.getStartTick() > ForceSpawnService.MIN_TICK_COUNT)
+			{
 				renderer.drawOutline(wcState.getGameObject(), config.inProgressWidth(), config.inProgressOutline(), config.inProgressFeather());
 			}
 		}
 
-        long now = Instant.now().toEpochMilli();
-		forceSpawnService.getTreeTimers().stream()
+		long now = Instant.now()
+			.toEpochMilli();
+		forceSpawnService.getTreeTimers()
+			.stream()
 			.filter(timer -> timer.getWorld() == client.getWorld())
 			.forEach(timer -> {
-				if (now - timer.getStartTimeMs() > timer.getTreeType().getDespawnDurationMs())
+				if (now - timer.getStartTimeMs() > timer.getTreeType()
+					.getDespawnDurationMs())
 				{
 					if (config.highlightCompleteTree())
-						woodcuttingService.getTreeFromWorldPoint(timer.getTree().getPoint())
-								.ifPresent(obj -> renderer.drawOutline(obj, config.completedWidth(), config.completedOutline(), config.completedFeather()));
+						woodcuttingService.getTreeObject(timer.getTree()).ifPresent(obj -> renderer.drawOutline(obj, config.completedWidth(), config.completedOutline(), config.completedFeather()));
 				}
-				else if (config.highlightInProgressTree())
+				else if (config.drawOutlineInProgressTree())
 				{
-					woodcuttingService.getTreeFromWorldPoint(timer.getTree().getPoint())
-						.ifPresent(obj -> renderer.drawOutline(obj, config.inProgressWidth(), config.inProgressOutline(), config.inProgressFeather()));
+					woodcuttingService.getTreeObject(timer.getTree()).ifPresent(obj -> renderer.drawOutline(obj, config.inProgressWidth(), config.inProgressOutline(), config.inProgressFeather()));
 				}
 			});
 
-        return null;
-    }
+		return null;
+	}
 }
