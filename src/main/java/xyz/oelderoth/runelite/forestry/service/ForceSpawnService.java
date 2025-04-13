@@ -64,6 +64,8 @@ public class ForceSpawnService
 	@Subscribe
 	private void onGameStateChanged(GameStateChanged e)
 	{
+		currentTreePanel.update();
+
 		var wcState = woodcuttingService.getWoodcuttingState();
 
 		if (wcState == null || !wcState.isForestryEligible())

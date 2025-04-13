@@ -39,11 +39,18 @@ public class CurrentTreePanel extends JPanel
 		.font(FontManager.getRunescapeSmallFont())
 		.build();
 
+	private final JLabel worldLabel = new LabelBuilder()
+		.foreground(PluginScheme.HINT_COLOR)
+		.font(FontManager.getRunescapeSmallFont())
+		.build();
+
 	private final JLabel icon = new LabelBuilder()
 		.text("\u00a0")
 		.bounds(0, 0, Constants.ITEM_SPRITE_WIDTH, Constants.ITEM_SPRITE_HEIGHT)
 		.preferredSize(Constants.ITEM_SPRITE_WIDTH, Constants.ITEM_SPRITE_HEIGHT)
 		.build();
+
+	private int previousWorld = 0;
 
 	@Inject
 	public CurrentTreePanel(
@@ -61,7 +68,10 @@ public class CurrentTreePanel extends JPanel
 
 		var infoPanel = new GridBagPanelBuilder()
 			.constraints(GridBagConstraintsBuilder.verticalRelative(2))
-			.add(titleLabel)
+			.add(new BorderPanelBuilder()
+				.addWest(titleLabel)
+				.addEast(worldLabel)
+				.build())
 			.add(hintLabel)
 			.build();
 
@@ -79,7 +89,26 @@ public class CurrentTreePanel extends JPanel
 
 	public void update()
 	{
+		switch (client.getGameState())
+		{
+			case LOGGED_IN:
+			case LOADING:
+				var currentWorld = client.getWorld();
+				if (previousWorld != currentWorld) {
+					worldLabel.setText("World " + currentWorld);
+					previousWorld = currentWorld;
+				}
+				break;
+			case HOPPING:
+				worldLabel.setText("Hopping...");
+				break;
+			default:
+				worldLabel.setText("");
+				break;
+		}
+
 		var wcStatus = woodcuttingService.getWoodcuttingState();
+
 		if (wcStatus != null)
 		{
 			itemManager.getImage(wcStatus.getTreeType()
