@@ -155,7 +155,16 @@ public class ForestryPluginPanel extends PluginPanel
 			unknownKeys.remove(key);
 			if (timerPanelsByHash.containsKey(key)) continue;
 
-			var panel = new TreeTimerPanel(config, itemManager, worldHopService, timer, () -> forceSpawnService.getTreeTimers().remove(timer));
+			var panel = new TreeTimerPanel(config, itemManager, worldHopService, timer, (owner) -> {
+				if (forceSpawnService.getTreeTimers().isEmpty()) return;
+
+				int confirm = JOptionPane.showConfirmDialog(owner,
+					"Are you sure you want to delete this timer?",
+					"Warning", JOptionPane.OK_CANCEL_OPTION);
+
+				if (confirm == 0)
+					forceSpawnService.getTreeTimers().remove(timer);
+			});
 			timerPanelsByHash.put(key, panel);
 
 			panelOrderDirty = true;

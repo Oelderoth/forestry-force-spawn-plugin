@@ -4,6 +4,8 @@ import java.awt.Cursor;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.function.Consumer;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +38,7 @@ public class TreeTimerPanel extends JPanel
 
 	private final ThinProgressBar progressBar = new ThinProgressBar();
 
-	public TreeTimerPanel(ForestryPluginConfig config, ItemManager itemManager, WorldHopService hopService, TreeTimer timer, Runnable onDeleteRequested)
+	public TreeTimerPanel(ForestryPluginConfig config, ItemManager itemManager, WorldHopService hopService, TreeTimer timer, Consumer<JComponent> onDeleteRequested)
 	{
 		this.config = config;
 		this.timer = timer;
@@ -61,7 +63,7 @@ public class TreeTimerPanel extends JPanel
 			.icon(Icons.TRASH)
 			.onMouseEntered((e, c) -> c.setIcon(Icons.TRASH_HOVER))
 			.onMouseExited((e, c) -> c.setIcon(Icons.TRASH))
-			.onClick((e, c) -> onDeleteRequested.run())
+			.onClick((e, c) -> onDeleteRequested.accept(this))
 			.cursor(Cursor.HAND_CURSOR)
 			.tooltipText("Delete timer")
 			.build();
@@ -102,7 +104,7 @@ public class TreeTimerPanel extends JPanel
 			.addSouth(progressBar)
 			.menuItem(new MenuItemBuilder()
 				.text("Remove timer")
-				.actionListener(e -> onDeleteRequested.run())
+				.actionListener(e -> onDeleteRequested.accept(this))
 				.build())
 			.menuItem(new MenuItemBuilder()
 				.text("Hop to world " + timer.getWorld())
