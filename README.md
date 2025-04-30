@@ -22,10 +22,10 @@ You can also right-click on a timer to hop to the corresponding world, or to del
 
 To start force spawning, you'll want to start cutting a tree that is able to spawn Forestry events. This includes most trees and locations, but excludes the following (more details can be found at [the OSRS Wiki](https://oldschool.runescape.wiki/w/Forestry#Spawn_Mechanics)):
 - Regular or Burnt trees
-- Hollow Trees
-- Player-Grown Trees
-- Blisterwood Tree
-- Redwood Trees
+- Hollow trees
+- Player-Grown trees
+- Blisterwood tree
+- Redwood trees
 - Trees in the Woodcutting Guild
 
 After at least one skill roll (4 game ticks spent cutting the tree), log out or hop worlds *without* stopping cutting the tree. 
