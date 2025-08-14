@@ -122,7 +122,11 @@ public class CurrentTreePanel extends JPanel
 				.findAny();
 			if (existingTimerOpt.isEmpty())
 			{
-				if (wcStatus.isForestryEligible()) {
+				if (!forceSpawnService.isTreeTypeEnabled(wcStatus.getTreeType())) {
+					hintLabel.setText("Tracking disabled in settings");
+					hintLabel.setForeground(PluginScheme.HINT_COLOR);
+				}
+				else if (wcStatus.isForestryEligible()) {
 					var ticks = client.getTickCount() - wcStatus.getStartTick();
 					var remaining = ForceSpawnService.MIN_TICK_COUNT - ticks;
 

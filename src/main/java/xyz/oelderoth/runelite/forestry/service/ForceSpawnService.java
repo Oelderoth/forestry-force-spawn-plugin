@@ -68,7 +68,7 @@ public class ForceSpawnService
 
 		var wcState = woodcuttingService.getWoodcuttingState();
 
-		if (wcState == null || !wcState.isForestryEligible())
+		if (wcState == null || !wcState.isForestryEligible() || !isTreeTypeEnabled(wcState.getTreeType()))
 			return;
 		if (e.getGameState() != GameState.HOPPING && e.getGameState() != GameState.LOGIN_SCREEN)
 			return;
@@ -89,7 +89,7 @@ public class ForceSpawnService
 		}
 	}
 
-	private boolean isTreeTypeEnabled(TreeType treeType) {
+	public boolean isTreeTypeEnabled(TreeType treeType) {
 		switch (treeType) {
 			case Oak:
 				return config.trackOakTree();

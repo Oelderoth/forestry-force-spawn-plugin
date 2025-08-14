@@ -22,7 +22,6 @@ import xyz.oelderoth.runelite.forestry.service.WoodcuttingService;
 @Singleton
 public class ForceSpawnOverlay extends Overlay
 {
-
 	@Inject
 	private Client client;
 
@@ -49,8 +48,11 @@ public class ForceSpawnOverlay extends Overlay
 	public Dimension render(Graphics2D graphics)
 	{
 		var wcState = woodcuttingService.getWoodcuttingState();
-		if (wcState != null && config.drawOutlineInProgressTree())
-		{
+		if (wcState != null
+			&& config.drawOutlineInProgressTree()
+			&& wcState.isForestryEligible()
+			&& forceSpawnService.isTreeTypeEnabled(wcState.getTreeType())
+		) {
 			if (client.getTickCount() - wcState.getStartTick() > ForceSpawnService.MIN_TICK_COUNT)
 			{
 				renderHighlight(graphics,
