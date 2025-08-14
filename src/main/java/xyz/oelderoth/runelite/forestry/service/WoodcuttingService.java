@@ -5,7 +5,9 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import javax.annotation.Nullable;
@@ -28,6 +30,7 @@ import net.runelite.api.events.GameObjectDespawned;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.ScriptPreFired;
+import net.runelite.api.gameval.ObjectID;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import xyz.oelderoth.runelite.forestry.domain.TreeCutDownListener;
@@ -57,6 +60,30 @@ public class WoodcuttingService
 	private final List<WoodcuttingStateListener> stateChangeListeners = new ArrayList<>();
 	private final List<TreeCutDownListener> treeCutDownListeners = new ArrayList<>();
 	private final HashMap<Integer, GameObject> objectCache = new HashMap<>();
+
+	private final Map<String, TreeType> treeTypeByNameCache = new HashMap<>();
+	private final Map<Integer, TreeType> treeTypeByIdCache = new HashMap<>();
+	private final Set<Integer> checkedObjectIdCache = new HashSet<>();
+	private final Set<Integer> excludedTreeIds = new HashSet<>();
+
+	public WoodcuttingService() {
+		for (var type : TreeType.values()) {
+			treeTypeByNameCache.put(type.getObjectName().toLowerCase(), type);
+		}
+		excludedTreeIds.addAll(Arrays.asList(
+			ObjectID.FARMING_TREE_PATCH_1,
+			ObjectID.FARMING_TREE_PATCH_2,
+			ObjectID.FARMING_TREE_PATCH_3,
+			ObjectID.FARMING_TREE_PATCH_4,
+			ObjectID.FARMING_TREE_PATCH_5,
+			ObjectID.FARMING_TREE_PATCH_6,
+			56953, // Auburnvale Tree Patch,
+			ObjectID.FARMING_HARDWOOD_TREE_PATCH_1,
+			ObjectID.FARMING_HARDWOOD_TREE_PATCH_2,
+			ObjectID.FARMING_HARDWOOD_TREE_PATCH_3,
+			ObjectID.FARMING_HARDWOOD_TREE_PATCH_4
+		));
+	}
 
 	public void enable()
 	{
@@ -157,7 +184,7 @@ public class WoodcuttingService
 
 	@Subscribe
 	private void onGameObjectDespawned(GameObjectDespawned e) {
-		if (TreeType.isTree(e.getGameObject())) {
+		if (getTreeType(e.getGameObject()).isPresent()) {
 			var p = new ObjectPosition(e.getGameObject());
 			objectCache.remove(p.hashCode());
 		}
@@ -182,11 +209,10 @@ public class WoodcuttingService
 				.getTiles()[worldPoint.getPlane()][localPoint.getSceneX()][localPoint.getSceneY()])
 			.map(Tile::getGameObjects)
 			.flatMap(objects -> Arrays.stream(objects)
-				.filter(it -> TreeType.getTreeType(it)
+				.filter(it -> getTreeType(it)
 					.isPresent())
 				.findFirst());
 	}
-
 
 	private Optional<GameObject> getFacingTree(Player player)
 	{
@@ -215,12 +241,47 @@ public class WoodcuttingService
 
 	private void onStartCutTree(GameObject gameObject)
 	{
-		TreeType.getTreeType(gameObject)
+		getTreeType(gameObject)
 			.ifPresent(type -> {
 				woodcuttingState = new WoodcuttingState(gameObject, type, client.getTickCount(), Instant.now()
 					.toEpochMilli());
 
 				stateChangeListeners.forEach(handler -> handler.onWoodcuttingStateChanged(woodcuttingState));
 			});
+	}
+
+	private Optional<TreeType> getTreeType(GameObject gameObject) {
+		if (gameObject == null) return Optional.empty();
+
+		var objectId = gameObject.getId();
+		if (excludedTreeIds.contains(objectId)) return Optional.empty();
+
+		var cachedType = treeTypeByIdCache.get(objectId);
+		if (cachedType != null) return Optional.of(cachedType);
+
+		// If we don't have a cached match, and we haven't already tried to check if this object is a known tree type,
+		// attempt to populate the cache by looking at the name of the object composition (and impostors if present)
+		if (checkedObjectIdCache.contains(objectId)) return Optional.empty();
+		var composition = client.getObjectDefinition(objectId);
+		if (composition != null) {
+			var type = treeTypeByNameCache.get(composition.getName().toLowerCase());
+			if (type != null) {
+				treeTypeByIdCache.put(objectId, type);
+			} else {
+				var impostorIds = composition.getImpostorIds();
+				if (impostorIds != null && impostorIds.length > 0) {
+					var impostor = composition.getImpostor();
+					var impostorType = treeTypeByNameCache.get(impostor.getName().toLowerCase());
+					if (impostorType != null) {
+						treeTypeByIdCache.put(objectId, impostorType);
+					}
+				}
+			}
+		}
+
+		// Cache the objectId so we don't have to look it up again next time if it wasn't a tree
+		checkedObjectIdCache.add(objectId);
+
+		return Optional.ofNullable(treeTypeByIdCache.get(objectId));
 	}
 }
