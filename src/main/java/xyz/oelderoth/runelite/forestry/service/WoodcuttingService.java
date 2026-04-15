@@ -106,11 +106,12 @@ public class WoodcuttingService
 			ObjectID.FARMING_TREE_PATCH_4,
 			ObjectID.FARMING_TREE_PATCH_5,
 			ObjectID.FARMING_TREE_PATCH_6,
-			56953, // Auburnvale Tree Patch,
+			ObjectID.FARMING_TREE_PATCH_7,
 			ObjectID.FARMING_HARDWOOD_TREE_PATCH_1,
 			ObjectID.FARMING_HARDWOOD_TREE_PATCH_2,
 			ObjectID.FARMING_HARDWOOD_TREE_PATCH_3,
-			ObjectID.FARMING_HARDWOOD_TREE_PATCH_4
+			ObjectID.FARMING_HARDWOOD_TREE_PATCH_4,
+			ObjectID.FARMING_HARDWOOD_TREE_PATCH_5
 		));
 	}
 
@@ -129,6 +130,7 @@ public class WoodcuttingService
 		stateChangeListeners.add(handler);
 	}
 
+	@SuppressWarnings("unused")
 	public void unregisterStateListener(WoodcuttingStateListener handler)
 	{
 		stateChangeListeners.remove(handler);
@@ -190,7 +192,7 @@ public class WoodcuttingService
 					.isPresent();
 				if (!isSameTree)
 				{
-					onStopCutTree(woodcuttingState.getGameObject());
+					onStopCutTree();
 					facingTree.ifPresent(this::onStartCutTree);
 				}
 			}
@@ -201,7 +203,7 @@ public class WoodcuttingService
 		}
 		else if (woodcuttingState != null)
 		{
-			onStopCutTree(woodcuttingState.getGameObject());
+			onStopCutTree();
 		}
 	}
 
@@ -219,7 +221,7 @@ public class WoodcuttingService
 		}
 	}
 
-	private void onStopCutTree(GameObject gameObject)
+	private void onStopCutTree()
 	{
 		woodcuttingState = null;
 		stateChangeListeners.forEach(handler -> handler.onWoodcuttingStateChanged(null));

@@ -371,10 +371,22 @@ public interface ForestryPluginConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "trackCamphorTree",
+		name = "Camphor tree",
+		description = "Track whether the plugin tracks camphor trees.",
+		position = 37,
+		section = treesSection
+	)
+	default boolean trackCamphorTree()
+	{
+		return true;
+	}
+	
+	@ConfigItem(
 		keyName = "trackMagicTree",
 		name = "Magic tree",
 		description = "Track whether the plugin tracks magic trees.",
-		position = 37,
+		position = 38,
 		section = treesSection
 	)
 	default boolean trackMagicTree()
@@ -382,4 +394,27 @@ public interface ForestryPluginConfig extends Config
 		return true;
 	}
 
+	@ConfigItem(
+		keyName = "trackIronwoodTree",
+		name = "Ironwood tree",
+		description = "Track whether the plugin tracks ironwood trees.",
+		position = 39,
+		section = treesSection
+	)
+	default boolean trackIronwoodTree()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "trackRosewoodTree",
+		name = "Rosewood tree",
+		description = "Track whether the plugin tracks rosewood trees.",
+		position = 40,
+		section = treesSection
+	)
+	default boolean trackRosewoodTree()
+	{
+		return true;
+	}
 }
