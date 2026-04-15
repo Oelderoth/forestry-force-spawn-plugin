@@ -107,6 +107,12 @@ public class ForceSpawnService
 				return config.trackYewTree();
 			case Magic:
 				return config.trackMagicTree();
+			case Camphor:
+				return config.trackCamphorTree();
+			case Ironwood:
+				return config.trackIronwoodTree();
+			case Rosewood:
+				return config.trackRosewoodTree();
 			default:
 				return false;
 		}
