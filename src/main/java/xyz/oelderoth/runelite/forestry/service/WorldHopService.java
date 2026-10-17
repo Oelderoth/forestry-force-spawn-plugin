@@ -8,7 +8,7 @@ import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.World;
 import net.runelite.api.events.GameTick;
-import net.runelite.api.widgets.ComponentID;
+import net.runelite.api.gameval.InterfaceID;
 import net.runelite.client.chat.ChatColorType;
 import net.runelite.client.chat.ChatMessageBuilder;
 import net.runelite.client.chat.ChatMessageManager;
@@ -77,7 +77,7 @@ public class WorldHopService
 	private void onGameTick(GameTick gameTick)
 	{
 		if (targetWorld == null) return;
-		if (client.getWidget(ComponentID.WORLD_SWITCHER_WORLD_LIST) == null)
+		if (client.getWidget(InterfaceID.Worldswitcher.BUTTONS) == null)
 		{
 			client.openWorldHopper();
 
@@ -111,7 +111,7 @@ public class WorldHopService
 				rsWorld.setAddress(apiWorld.getAddress());
 				rsWorld.setId(apiWorld.getId());
 				rsWorld.setPlayerCount(apiWorld.getPlayers());
-				rsWorld.setLocation(apiWorld.getLocation());
+				rsWorld.setLocation(apiWorld.getRegion().getId());
 				rsWorld.setTypes(WorldUtil.toWorldTypes(apiWorld.getTypes()));
 
 				return rsWorld;
